@@ -1,0 +1,784 @@
+<template>
+  <div class="page-content contact-page">
+    <!-- Hero Section -->
+    <section class="contact-hero">
+      <h1 class="contact-hero-title">Get in Touch with DisasterWatch</h1>
+      <p class="contact-hero-subtitle">We're here to help. Questions? Support, queries, or feedback</p>
+    </section>
+
+    <!-- Main Contact Content -->
+    <section class="contact-main">
+      <div class="contact-wrapper">
+        <!-- Contact Form -->
+        <div class="contact-form-section">
+          <div class="form-header">
+            <h2>Send us a Message</h2>
+          </div>
+
+          <form @submit.prevent="submitContactForm" class="contact-form">
+            <!-- Success Message -->
+            <div v-if="formSubmitted" class="success-message">
+              <div class="success-icon">✓</div>
+              <h3>Thank you!</h3>
+              <p>Your message has been sent successfully. We'll be in touch soon.</p>
+            </div>
+
+            <!-- Error Message -->
+            <div v-if="formError && !formSubmitted" class="error-message">
+              <span class="error-icon">⚠</span>
+              {{ formError }}
+            </div>
+
+            <!-- Form Fields -->
+            <div v-if="!formSubmitted" class="form-row">
+              <div class="form-group">
+                <input
+                  v-model="form.fullName"
+                  type="text"
+                  class="form-input"
+                  placeholder="Full Name"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <input
+                  v-model="form.email"
+                  type="email"
+                  class="form-input"
+                  placeholder="Email Address"
+                  required
+                />
+              </div>
+            </div>
+
+            <div v-if="!formSubmitted" class="form-group">
+              <input
+                v-model="form.subject"
+                type="text"
+                class="form-input"
+                placeholder="Subject"
+                required
+              />
+            </div>
+
+            <div v-if="!formSubmitted" class="form-group">
+              <textarea
+                v-model="form.message"
+                class="form-textarea"
+                placeholder="Message"
+                rows="5"
+                required
+              ></textarea>
+            </div>
+
+            <button v-if="!formSubmitted" type="submit" class="btn btn-primary form-submit">
+              Send Message
+            </button>
+          </form>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="contact-info-section">
+          <div class="info-header">
+            <h2>Contact Information</h2>
+          </div>
+
+          <!-- Contact Info Cards -->
+          <div class="contact-info-cards">
+            <!-- Email -->
+            <div class="info-card">
+              <div class="info-icon">✉️</div>
+              <h3>Email</h3>
+              <p class="info-detail">info@disasterwatch.ph</p>
+              <p class="info-subtext">Support during business hours</p>
+            </div>
+
+            <!-- Phone -->
+            <div class="info-card">
+              <div class="info-icon">📞</div>
+              <h3>Phone Number</h3>
+              <p class="info-detail">+63-85-225-0000</p>
+              <p class="info-subtext">Mon - Fri, 8:00 AM - 5:00 PM</p>
+            </div>
+
+            <!-- Office -->
+            <div class="info-card">
+              <div class="info-icon">📍</div>
+              <h3>Office Location</h3>
+              <p class="info-detail">Butuan City, Caraga</p>
+              <p class="info-subtext">Regional Office</p>
+            </div>
+
+            <!-- Hours -->
+            <div class="info-card">
+              <div class="info-icon">🕐</div>
+              <h3>Office Hours</h3>
+              <p class="info-detail">Monday - Friday, 9 AM - 5 PM</p>
+              <p class="info-subtext">Saturday - Sunday: Closed</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mini Map Section -->
+      <div class="location-section">
+        <div class="map-container">
+          <div class="map-placeholder">
+            <img src="../assets/map.png" alt="Caraga Region Map" class="map-image" />
+            <button class="btn btn-map-link">📍 Subscribe to Caraga Region</button>
+          </div>
+        </div>
+        <p class="map-description">DisasterWatch serves the entire Caraga Region, providing real-time monitoring and emergency resources to protect our communities.</p>
+      </div>
+    </section>
+
+    <!-- Emergency Alert Section -->
+    <section class="emergency-section">
+      <div class="emergency-content">
+        <div class="emergency-header">
+          <span class="emergency-icon">⚠️</span>
+          <h2>Emergency Alert</h2>
+        </div>
+        <p>In case of immediate earthquake emergency, reach the local CDRRMO hotline immediately</p>
+        <div class="emergency-buttons">
+          <button class="btn btn-emergency">☎️ Call 911</button>
+          <button class="btn btn-secondary">� Emergency Hotline</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+defineEmits(['navigate'])
+
+const form = ref({
+  fullName: '',
+  email: '',
+  subject: '',
+  message: ''
+})
+
+const formSubmitted = ref(false)
+const formError = ref('')
+
+const submitContactForm = () => {
+  // Validate form
+  if (!form.value.fullName || !form.value.email || !form.value.subject || !form.value.message) {
+    formError.value = 'Please fill out all fields'
+    return
+  }
+
+  // Basic email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(form.value.email)) {
+    formError.value = 'Please enter a valid email address'
+    return
+  }
+
+  // Success
+  formError.value = ''
+  formSubmitted.value = true
+  
+  // Reset form after 2 seconds
+  setTimeout(() => {
+    form.value = {
+      fullName: '',
+      email: '',
+      subject: '',
+      message: ''
+    }
+    formSubmitted.value = false
+  }, 2000)
+}
+</script>
+
+<style scoped>
+.page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-page {
+  background: white;
+}
+
+/* Hero Section */
+.contact-hero {
+  background: linear-gradient(135deg, #FF7A00 0%, #FF9933 100%);
+  color: white;
+  text-align: center;
+  padding: 3rem 2rem;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.contact-hero-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+}
+
+.contact-hero-subtitle {
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.5;
+  opacity: 0.95;
+}
+
+/* Contact Main Section */
+.contact-main {
+  padding: 3rem 2rem;
+  background: white;
+}
+
+.contact-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+}
+
+/* Contact Form Section */
+.contact-form-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.form-header h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin: 0 0 1.5rem 0;
+  font-weight: 700;
+}
+
+/* Contact Form */
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-input,
+.form-textarea {
+  padding: 0.9rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: #999;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #FF7A00;
+  box-shadow: 0 0 0 3px rgba(255, 122, 0, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* Form Messages */
+.success-message,
+.error-message {
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.success-message {
+  background: linear-gradient(135deg, #44AA44 0%, #66CC66 100%);
+  color: white;
+  text-align: center;
+}
+
+.success-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.success-message h3 {
+  font-size: 1.2rem;
+  margin: 0.5rem 0;
+  font-weight: 600;
+}
+
+.success-message p {
+  margin: 0;
+  font-size: 0.95rem;
+  opacity: 0.95;
+}
+
+.error-message {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8787 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.error-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+/* Form Submit Button */
+.form-submit {
+  width: 100%;
+}
+
+/* Contact Info Section */
+.contact-info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.info-header h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin: 0 0 1rem 0;
+  font-weight: 700;
+}
+
+/* Contact Info Cards */
+.contact-info-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.2rem;
+}
+
+.info-card {
+  padding: 1.2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-left: 4px solid #FF7A00;
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  box-shadow: 0 4px 12px rgba(255, 122, 0, 0.15);
+}
+
+.info-icon {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.info-card h3 {
+  font-size: 1rem;
+  color: #333;
+  margin: 0.5rem 0;
+  font-weight: 600;
+}
+
+.info-detail {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #FF7A00;
+  margin: 0.3rem 0;
+}
+
+.info-subtext {
+  font-size: 0.85rem;
+  color: #999;
+  margin: 0;
+}
+
+/* Location Section */
+.location-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-top: 2rem;
+}
+
+.map-container {
+  width: 100%;
+  height: 300px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.map-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.map-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.btn-map-link {
+  position: absolute;
+  bottom: 1.5rem;
+  background: white;
+  color: #333;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.btn-map-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  background: #f5f5f5;
+}
+
+.map-description {
+  font-size: 0.95rem;
+  color: #666;
+  text-align: center;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Emergency Section */
+.emergency-section {
+  background: linear-gradient(135deg, #E63946 0%, #F1144C 100%);
+  padding: 2.5rem 2rem;
+  margin-top: 2rem;
+}
+
+.emergency-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  color: white;
+}
+
+.emergency-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.emergency-icon {
+  font-size: 2rem;
+}
+
+.emergency-header h2 {
+  font-size: 1.6rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+.emergency-content p {
+  font-size: 1rem;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.6;
+  opacity: 0.95;
+}
+
+.emergency-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Buttons */
+.btn {
+  padding: 0.9rem 1.8rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #FF7A00;
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 122, 0, 0.3);
+}
+
+.btn-primary:hover {
+  background-color: #E56A00;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 122, 0, 0.4);
+}
+
+.btn-emergency {
+  background: white;
+  color: #E63946;
+  font-weight: 700;
+}
+
+.btn-emergency:hover {
+  background: #f5f5f5;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid white;
+}
+
+.btn-secondary:hover {
+  background: white;
+  color: #E63946;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .contact-wrapper {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .contact-hero-title {
+    font-size: 1.8rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .contact-hero {
+    padding: 2rem 1.5rem;
+    min-height: 140px;
+  }
+
+  .contact-hero-title {
+    font-size: 1.4rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .contact-hero-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .contact-main {
+    padding: 2rem 1.5rem;
+  }
+
+  .contact-wrapper {
+    gap: 1.5rem;
+  }
+
+  .contact-form-section {
+    padding: 1.5rem;
+  }
+
+  .form-header h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .contact-form {
+    gap: 0.8rem;
+  }
+
+  .form-input,
+  .form-textarea {
+    padding: 0.8rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .info-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .contact-info-cards {
+    gap: 1rem;
+  }
+
+  .info-card {
+    padding: 1rem;
+  }
+
+  .map-container {
+    height: 250px;
+    margin-bottom: 1rem;
+  }
+
+  .emergency-section {
+    padding: 2rem 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .emergency-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .emergency-buttons {
+    gap: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-hero {
+    padding: 1.5rem 1rem;
+    min-height: 120px;
+  }
+
+  .contact-hero-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .contact-hero-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .contact-main {
+    padding: 1.5rem 1rem;
+  }
+
+  .contact-wrapper {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .contact-form-section {
+    padding: 1.2rem;
+  }
+
+  .form-header h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-input,
+  .form-textarea {
+    font-size: 16px;
+    padding: 0.8rem;
+  }
+
+  .form-submit {
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+  }
+
+  .info-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .info-card {
+    padding: 1rem;
+  }
+
+  .info-icon {
+    font-size: 1.5rem;
+  }
+
+  .info-card h3 {
+    font-size: 0.95rem;
+  }
+
+  .info-detail {
+    font-size: 0.9rem;
+  }
+
+  .info-subtext {
+    font-size: 0.8rem;
+  }
+
+  .map-container {
+    height: 200px;
+  }
+
+  .btn-map-link {
+    bottom: 1rem;
+    padding: 0.7rem 1.2rem;
+    font-size: 0.85rem;
+  }
+
+  .map-description {
+    font-size: 0.9rem;
+  }
+
+  .emergency-section {
+    padding: 1.5rem 1rem;
+    margin-top: 1rem;
+  }
+
+  .emergency-header {
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .emergency-icon {
+    font-size: 1.5rem;
+  }
+
+  .emergency-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .emergency-content p {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .emergency-buttons {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+</style>
