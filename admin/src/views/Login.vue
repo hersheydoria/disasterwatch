@@ -1,0 +1,106 @@
+<template>
+  <div class="page-wrap">
+    <div class="bg-circle c1"></div>
+    <div class="bg-circle c2"></div>
+
+    <div class="card">
+      <div class="brand">
+        <div class="logo" aria-hidden>
+          <img :src="logo" alt="DisasterWatch logo" class="logo-img" />
+        </div>
+        <div class="brand-text">DisasterWatch</div>
+      </div>
+
+      <h1 class="title">Welcome</h1>
+      <p class="subtitle">Sign in to your account to continue</p>
+
+      <form class="login-form" @submit.prevent="submit">
+        <label class="field">
+          <div class="label">Username</div>
+          <div class="input-row">
+            <svg class="icon" viewBox="0 0 24 24"><path fill="#9aa0a6" d="M12 12a5 5 0 100-10 5 5 0 000 10zM2 20a10 10 0 0120 0H2z"/></svg>
+            <input v-model="form.username" placeholder="Enter your username" />
+          </div>
+        </label>
+
+        <label class="field">
+          <div class="label">Password</div>
+          <div class="input-row">
+            <svg class="icon" viewBox="0 0 24 24"><path fill="#9aa0a6" d="M17 8V7a5 5 0 10-10 0v1H5v11h14V8h-2zm-8 0V7a3 3 0 116 0v1H9z"/></svg>
+            <input type="password" v-model="form.password" placeholder="Enter your password" />
+          </div>
+        </label>
+
+        <div class="row small">
+          <label class="remember">
+            <input type="checkbox" v-model="form.remember" />
+            Remember me
+          </label>
+          <a class="forgot" href="#">Forgot Password?</a>
+        </div>
+
+        <button class="primary" type="submit">Sign In</button>
+      </form>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { reactive } from 'vue'
+import logo from '../assets/logo.png'
+
+const emit = defineEmits(['login'])
+
+const form = reactive({ username: '', password: '', remember: false })
+
+function submit() {
+  // In a real app you'd validate and call an API. Here we emit "login" to let the parent show the dashboard.
+  emit('login')
+}
+</script>
+
+<style scoped>
+.page-wrap{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: linear-gradient(135deg, #f06b18 0%, #e86a24 40%, #d85a2a 100%);
+  padding:40px;
+  position:relative;
+}
+.bg-circle{
+  position:absolute;
+  border-radius:50%;
+  opacity:0.06;
+}
+.bg-circle.c1{ width:300px; height:300px; left:40px; top:40px; background:#000; }
+.bg-circle.c2{ width:180px; height:180px; right:60px; bottom:60px; background:#000; }
+.card{
+  width:420px;
+  background: #fff;
+  border-radius:12px;
+  padding:28px 32px;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.18);
+}
+.brand{ display:flex; align-items:center; gap:12px; margin-bottom:14px; justify-content:center }
+.logo{ width:40px; height:40px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg,#ff8a46,#ff6b1a); box-shadow:0 6px 18px rgba(255,107,26,0.18)}
+.logo-img{ width:22px; height:22px; object-fit:contain }
+.brand-text{ font-weight:700; color:#222 }
+.title{ margin: 4px 0 6px; font-size:22px; color:#111; text-align:center }
+.subtitle{ margin:0 0 18px; color:#7a7f84; font-size:13px; text-align:center }
+.login-form{ display:flex; flex-direction:column; gap:12px }
+.field .label{ color:#6b7075; font-size:12px; margin-bottom:6px }
+.input-row{ display:flex; align-items:center; gap:10px; border:1px solid #eef0f2; padding:10px 12px; border-radius:6px; background:#fafafa }
+.input-row .icon{ width:18px; height:18px }
+input{ border:0; outline:none; font-size:14px; background:transparent; flex:1 }
+.row.small{ display:flex; justify-content:space-between; align-items:center; margin-top:6px }
+.remember{ display:flex; gap:8px; align-items:center; color:#6b7075; font-size:13px }
+.forgot{ color:#ff6b1a; text-decoration:none; font-size:13px }
+.primary{ margin-top:10px; background:linear-gradient(180deg,#ff7b3a,#ff6b1a); color:white; border:0; padding:12px; border-radius:8px; font-weight:600; cursor:pointer; box-shadow:0 8px 18px rgba(255,107,26,0.18) }
+.primary:active{ transform:translateY(1px) }
+
+@media (max-width:480px){
+  .card{ width:100%; padding:24px }
+}
+</style>
