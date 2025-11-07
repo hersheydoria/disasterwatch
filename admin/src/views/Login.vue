@@ -14,6 +14,8 @@
       <h1 class="title">Welcome</h1>
       <p class="subtitle">Sign in to your account to continue</p>
 
+      <div v-if="error" class="error-message">{{ error }}</div>
+
       <form class="login-form" @submit.prevent="submit">
         <label class="field">
           <div class="label">Username</div>
@@ -39,23 +41,53 @@
           <a class="forgot" href="#">Forgot Password?</a>
         </div>
 
-        <button class="primary" type="submit">Sign In</button>
+        <button class="primary" type="submit" :disabled="loading">
+          {{ loading ? 'Signing In...' : 'Sign In' }}
+        </button>
       </form>
     </div>
   </div>
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import logo from '../assets/logo.png'
+import { login } from '../api/client'
 
 const emit = defineEmits(['login'])
 
 const form = reactive({ username: '', password: '', remember: false })
+const loading = ref(false)
+const error = ref('')
 
-function submit() {
-  // In a real app you'd validate and call an API. Here we emit "login" to let the parent show the dashboard.
-  emit('login')
+async function submit() {
+  if (!form.username || !form.password) {
+    error.value = 'Please enter username and password'
+    return
+  }
+
+  loading.value = true
+  error.value = ''
+
+  try {
+    const response = await login(form.username, form.password)
+    console.log('Login successful:', response)
+    
+    // Save user preference for remember me
+    if (form.remember) {
+      localStorage.setItem('rememberUsername', form.username)
+    } else {
+      localStorage.removeItem('rememberUsername')
+    }
+    
+    // Emit login event to trigger dashboard display
+    emit('login')
+  } catch (err) {
+    error.value = err.message || 'Login failed. Please try again.'
+    console.error('Login error:', err)
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
@@ -89,6 +121,7 @@ function submit() {
 .brand-text{ font-weight:700; color:#222 }
 .title{ margin: 4px 0 6px; font-size:22px; color:#111; text-align:center }
 .subtitle{ margin:0 0 18px; color:#7a7f84; font-size:13px; text-align:center }
+.error-message{ background:#fee; border:1px solid #fcc; color:#c33; padding:10px 12px; border-radius:6px; font-size:13px; margin-bottom:12px; text-align:center }
 .login-form{ display:flex; flex-direction:column; gap:12px }
 .field .label{ color:#6b7075; font-size:12px; margin-bottom:6px }
 .input-row{ display:flex; align-items:center; gap:10px; border:1px solid #eef0f2; padding:10px 12px; border-radius:6px; background:#fafafa }
@@ -98,6 +131,7 @@ input{ border:0; outline:none; font-size:14px; background:transparent; flex:1 }
 .remember{ display:flex; gap:8px; align-items:center; color:#6b7075; font-size:13px }
 .forgot{ color:#ff6b1a; text-decoration:none; font-size:13px }
 .primary{ margin-top:10px; background:linear-gradient(180deg,#ff7b3a,#ff6b1a); color:white; border:0; padding:12px; border-radius:8px; font-weight:600; cursor:pointer; box-shadow:0 8px 18px rgba(255,107,26,0.18) }
+.primary:disabled{ opacity:0.6; cursor:not-allowed }
 .primary:active{ transform:translateY(1px) }
 
 @media (max-width:480px){

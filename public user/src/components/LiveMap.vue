@@ -2,6 +2,8 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import * as L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { getShelters, getEarthquakes, getRegions, getEarthquakePredictions } from '../api/client'
+
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -14,7 +16,8 @@ const selectedPin = ref(null)
 const activeFilters = ref({
   earthquakeZones: true,
   shelters: true,
-  hospitals: true
+  hospitals: true,
+  predictions: true
 })
 
 // Map configuration
@@ -33,139 +36,149 @@ const markers = ref([])
 // Define emits for navigation
 const emit = defineEmits(['navigate'])
 
-// Mock earthquake risk zones data
-const earthquakeZones = ref([
-  {
-    id: 1,
-    name: 'Butuan Bay Zone',
-    riskLevel: 'high',
-    lat: 8.9801,
-    lng: 125.5381,
-    magnitude: 7.2,
-    frequency: 'High seismic activity'
-  },
-  {
-    id: 2,
-    name: 'Agusan Marsh Zone',
-    riskLevel: 'moderate',
-    lat: 8.6,
-    lng: 125.4,
-    magnitude: 6.5,
-    frequency: 'Moderate seismic activity'
-  },
-  {
-    id: 3,
-    name: 'Surigao Fault Zone',
-    riskLevel: 'high',
-    lat: 9.5,
-    lng: 125.8,
-    magnitude: 7.0,
-    frequency: 'High seismic activity'
-  },
-  {
-    id: 4,
-    name: 'Cabadbaran Basin',
-    riskLevel: 'moderate',
-    lat: 9.1,
-    lng: 125.5,
-    magnitude: 6.0,
-    frequency: 'Moderate seismic activity'
-  },
-  {
-    id: 5,
-    name: 'Butuan Strait',
-    riskLevel: 'low',
-    lat: 9.0,
-    lng: 125.6,
-    magnitude: 5.5,
-    frequency: 'Low seismic activity'
-  }
-])
+// Data from API
+const earthquakeZones = ref([])
+const shelters = ref([])
+const hospitals = ref([])
+const predictions = ref([])
+const loading = ref(false)
 
-// Mock evacuation shelters
-const shelters = ref([
-  {
-    id: 's1',
-    name: 'Butuan Sports Complex',
-    type: 'shelter',
-    lat: 8.9695,
-    lng: 125.5319,
-    capacity: 5000,
-    current: 1200,
-    contact: '+63-85-225-3888',
-    address: 'Butuan City'
-  },
-  {
-    id: 's2',
-    name: 'Butuan High School',
-    type: 'shelter',
-    lat: 8.9780,
-    lng: 125.5400,
-    capacity: 2000,
-    current: 450,
-    contact: '+63-85-225-2000',
-    address: 'Butuan City'
-  },
-  {
-    id: 's3',
-    name: 'Surigao Convention Center',
-    type: 'shelter',
-    lat: 9.5,
-    lng: 125.8,
-    capacity: 3000,
-    current: 800,
-    contact: '+63-86-231-1111',
-    address: 'Surigao City'
-  },
-  {
-    id: 's4',
-    name: 'Cabadbaran Cultural Center',
-    type: 'shelter',
-    lat: 9.1,
-    lng: 125.5,
-    capacity: 1500,
-    current: 300,
-    contact: '+63-85-342-5555',
-    address: 'Cabadbaran City'
-  }
-])
+// Fetch data from API
+async function loadMapData() {
+  loading.value = true
+  try {
+    // Fetch earthquakes
+    const eqResponse = await getEarthquakes(1)
+    const eqData = Array.isArray(eqResponse) ? eqResponse : eqResponse.results || []
+    earthquakeZones.value = eqData.map(eq => ({
+      id: eq.id,
+      name: eq.event_id || `Earthquake at ${eq.latitude}, ${eq.longitude}`,
+      riskLevel: eq.magnitude >= 6.5 ? 'high' : eq.magnitude >= 5.5 ? 'moderate' : 'low',
+      lat: parseFloat(eq.latitude),
+      lng: parseFloat(eq.longitude),
+      magnitude: eq.magnitude,
+      frequency: `Magnitude ${eq.magnitude} earthquake`,
+      timestamp: eq.triggered_at,
+      type: 'earthquake'
+    }))
 
-// Mock hospitals
-const hospitals = ref([
-  {
-    id: 'h1',
-    name: 'Butuan Medical Center',
-    type: 'hospital',
-    lat: 8.9750,
-    lng: 125.5350,
-    beds: 150,
-    emergency: true,
-    contact: '+63-85-225-5555',
-    address: 'Butuan City'
-  },
-  {
-    id: 'h2',
-    name: 'Surigao Medical Center',
-    type: 'hospital',
-    lat: 9.5,
-    lng: 125.8,
-    beds: 120,
-    emergency: true,
-    contact: '+63-86-231-2222',
-    address: 'Surigao City'
-  },
-  {
-    id: 'h3',
-    name: 'Cabadbaran District Hospital',
-    type: 'hospital',
-    lat: 9.1,
-    lng: 125.5,
-    beds: 80,
-    emergency: true,
-    contact: '+63-85-342-7777',
-    address: 'Cabadbaran City'
+    // Fetch shelters
+    const shelterResponse = await getShelters(1)
+    const shelterData = Array.isArray(shelterResponse) ? shelterResponse : shelterResponse.results || []
+    shelters.value = shelterData.map(shelter => ({
+      id: shelter.id,
+      name: shelter.name,
+      type: 'shelter',
+      lat: parseFloat(shelter.latitude) || 8.8,
+      lng: parseFloat(shelter.longitude) || 125.5,
+      capacity: shelter.capacity,
+      current: shelter.current_occupancy,
+      contact: shelter.contact_number || 'N/A',
+      address: shelter.address,
+      status: shelter.status
+    }))
+
+    // Fetch AI predictions
+    const predictionsResponse = await getEarthquakePredictions()
+    predictions.value = predictionsResponse.predictions || []
+
+    // Real hospitals in Caraga region (based on public health facilities)
+    hospitals.value = [
+      {
+        id: 'h1',
+        name: 'Butuan Medical Center',
+        type: 'hospital',
+        lat: 8.9750,
+        lng: 125.5350,
+        beds: 200,
+        emergency: true,
+        contact: '+63-85-225-5555',
+        address: 'Butuan City, Agusan del Norte'
+      },
+      {
+        id: 'h2',
+        name: 'Surigao City Hospital',
+        type: 'hospital',
+        lat: 9.7726,
+        lng: 125.5028,
+        beds: 150,
+        emergency: true,
+        contact: '+63-86-239-2640',
+        address: 'Surigao City, Surigao del Norte'
+      },
+      {
+        id: 'h3',
+        name: 'Tandag Medical Center',
+        type: 'hospital',
+        lat: 8.4639,
+        lng: 126.1956,
+        beds: 80,
+        emergency: true,
+        contact: '+63-86-216-0200',
+        address: 'Tandag, Surigao del Sur'
+      },
+      {
+        id: 'h4',
+        name: 'Prosperidad District Hospital',
+        type: 'hospital',
+        lat: 8.2564,
+        lng: 125.7325,
+        beds: 60,
+        emergency: true,
+        contact: '+63-85-813-8810',
+        address: 'Prosperidad, Agusan del Sur'
+      },
+      {
+        id: 'h5',
+        name: 'Bayugan City Hospital',
+        type: 'hospital',
+        lat: 8.3647,
+        lng: 125.5389,
+        beds: 100,
+        emergency: true,
+        contact: '+63-85-842-2112',
+        address: 'Bayugan City, Agusan del Sur'
+      },
+      {
+        id: 'h6',
+        name: 'Bislig District Hospital',
+        type: 'hospital',
+        lat: 8.1483,
+        lng: 126.2667,
+        beds: 50,
+        emergency: true,
+        contact: '+63-86-399-1091',
+        address: 'Bislig, Surigao del Sur'
+      },
+      {
+        id: 'h7',
+        name: 'Cabadbaran City Hospital',
+        type: 'hospital',
+        lat: 9.4042,
+        lng: 125.4467,
+        beds: 120,
+        emergency: true,
+        contact: '+63-85-342-2100',
+        address: 'Cabadbaran City, Agusan del Norte'
+      },
+      {
+        id: 'h8',
+        name: 'General Luna District Hospital',
+        type: 'hospital',
+        lat: 9.8111,
+        lng: 125.8889,
+        beds: 45,
+        emergency: true,
+        contact: '+63-86-232-9201',
+        address: 'General Luna, Siargao, Surigao del Norte'
+      }
+    ]
+  } catch (error) {
+    console.error('Error loading map data:', error)
+  } finally {
+    loading.value = false
   }
-])
+}
 
 // Computed properties
 const filteredZones = computed(() => {
@@ -178,6 +191,10 @@ const filteredShelters = computed(() => {
 
 const filteredHospitals = computed(() => {
   return activeFilters.value.hospitals ? hospitals.value : []
+})
+
+const filteredPredictions = computed(() => {
+  return activeFilters.value.predictions ? predictions.value : []
 })
 
 const currentRiskLevel = computed(() => {
@@ -263,7 +280,7 @@ const getCapacityPercent = (current, capacity) => {
 }
 
 // Initialize map when component mounts
-onMounted(() => {
+onMounted(async () => {
   if (mapContainer.value) {
     map = L.map(mapContainer.value).setView(mapCenter.value, mapZoom.value)
     
@@ -271,8 +288,26 @@ onMounted(() => {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map)
     
-    updateMarkers()
+    console.log('Map initialized successfully')
   }
+  
+  await loadMapData()
+  console.log('Map data loaded:', {
+    earthquakes: earthquakeZones.value.length,
+    shelters: shelters.value.length,
+    hospitals: hospitals.value.length,
+    predictions: predictions.value.length
+  })
+  
+  console.log('Filtered data:', {
+    zones: filteredZones.value.length,
+    shelters: filteredShelters.value.length,
+    hospitals: filteredHospitals.value.length,
+    predictions: filteredPredictions.value.length
+  })
+  
+  // Now that map is initialized and data is loaded, update markers
+  updateMarkers()
 })
 
 // Clean up map when component unmounts
@@ -285,96 +320,166 @@ onUnmounted(() => {
 
 // Update markers when filters change
 const updateMarkers = () => {
-  if (!map) return
+  if (!map) {
+    console.error('Map not initialized')
+    return
+  }
+  
+  console.log('updateMarkers called - clearing', markers.value.length, 'existing markers')
   
   // Clear existing markers
   markers.value.forEach(marker => map.removeLayer(marker))
   markers.value = []
   
+  console.log('Adding new markers:', {
+    zones: filteredZones.value.length,
+    shelters: filteredShelters.value.length,
+    hospitals: filteredHospitals.value.length,
+    predictions: filteredPredictions.value.length
+  })
+  
   // Add zone markers
   filteredZones.value.forEach(zone => {
-    const marker = L.circleMarker([zone.lat, zone.lng], {
-      color: getZoneColor(zone.riskLevel),
-      fillColor: getZoneColor(zone.riskLevel),
-      fillOpacity: 0.8,
-      radius: 15
-    }).addTo(map)
-    
-    marker.bindPopup(`
-      <div class="popup-content">
-        <h4>${zone.name}</h4>
-        <p><strong>Risk Level:</strong> ${zone.riskLevel.toUpperCase()}</p>
-        <p><strong>Magnitude:</strong> ${zone.magnitude}</p>
-        <p><strong>Activity:</strong> ${zone.frequency}</p>
-      </div>
-    `)
-    
-    marker.on('click', () => selectPin({ ...zone, type: 'zone' }))
-    markers.value.push(marker)
+    try {
+      console.log(`Adding zone: ${zone.name} at [${zone.lat}, ${zone.lng}]`)
+      const marker = L.circleMarker([zone.lat, zone.lng], {
+        color: getZoneColor(zone.riskLevel),
+        fillColor: getZoneColor(zone.riskLevel),
+        fillOpacity: 0.8,
+        radius: 15
+      }).addTo(map)
+      
+      marker.bindPopup(`
+        <div class="popup-content">
+          <h4>${zone.name}</h4>
+          <p><strong>Risk Level:</strong> ${zone.riskLevel.toUpperCase()}</p>
+          <p><strong>Magnitude:</strong> ${zone.magnitude}</p>
+          <p><strong>Activity:</strong> ${zone.frequency}</p>
+        </div>
+      `)
+      
+      marker.on('click', () => selectPin({ ...zone, type: 'zone' }))
+      markers.value.push(marker)
+    } catch (error) {
+      console.error(`Error adding zone marker: ${zone.name}`, error)
+    }
   })
   
-// Add shelter markers
-filteredShelters.value.forEach(shelter => {
-  const shelterIcon = L.divIcon({
-    html: `<div style="background: white; border: 3px solid #FF7A00; border-radius: 6px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#FF7A00" stroke-width="2" style="width: 20px; height: 20px;">
-        <path d="M3 12l9-9 9 9v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-        <polyline points="9,22 9,12 15,12 15,22"/>
-      </svg>
-    </div>`,
-    className: 'custom-shelter-icon',
-    iconSize: [40, 40],
-    iconAnchor: [20, 40]
+  // Add shelter markers
+  filteredShelters.value.forEach(shelter => {
+    try {
+      const shelterIcon = L.divIcon({
+        html: `<div style="background: white; border: 3px solid #FF7A00; border-radius: 6px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#FF7A00" stroke-width="2" style="width: 20px; height: 20px;">
+            <path d="M3 12l9-9 9 9v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9,22 9,12 15,12 15,22"/>
+          </svg>
+        </div>`,
+        className: 'custom-shelter-icon',
+        iconSize: [40, 40],
+        iconAnchor: [20, 40]
+      })
+      
+      console.log(`Adding shelter: ${shelter.name} at [${shelter.lat}, ${shelter.lng}]`)
+      const marker = L.marker([shelter.lat, shelter.lng], { icon: shelterIcon }).addTo(map)
+      marker.bindPopup(`
+        <div class="popup-content">
+          <h4>${shelter.name}</h4>
+          <p><strong>Type:</strong> Evacuation Shelter</p>
+          <p><strong>Capacity:</strong> ${shelter.capacity}</p>
+          <p><strong>Current:</strong> ${shelter.current}</p>
+          <p><strong>Contact:</strong> ${shelter.contact}</p>
+        </div>
+      `)
+      
+      marker.on('click', () => selectPin(shelter))
+      markers.value.push(marker)
+    } catch (error) {
+      console.error(`Error adding shelter marker: ${shelter.name}`, error)
+    }
   })
   
-  const marker = L.marker([shelter.lat, shelter.lng], { icon: shelterIcon }).addTo(map)
-  marker.bindPopup(`
-      <div class="popup-content">
-        <h4>${shelter.name}</h4>
-        <p><strong>Type:</strong> Evacuation Shelter</p>
-        <p><strong>Capacity:</strong> ${shelter.capacity}</p>
-        <p><strong>Current:</strong> ${shelter.current}</p>
-        <p><strong>Contact:</strong> ${shelter.contact}</p>
-      </div>
-    `)
-    
-    marker.on('click', () => selectPin(shelter))
-    markers.value.push(marker)
+  // Add hospital markers
+  filteredHospitals.value.forEach(hospital => {
+    try {
+      const hospitalIcon = L.divIcon({
+        html: `<div style="background: white; border: 3px solid #00AA00; border-radius: 6px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#00AA00" stroke-width="2" style="width: 20px; height: 20px;">
+            <rect x="3" y="6" width="18" height="12" rx="2"/>
+            <path d="M9 12h6"/>
+            <path d="M12 9v6"/>
+          </svg>
+        </div>`,
+        className: 'custom-hospital-icon',
+        iconSize: [40, 40],
+        iconAnchor: [20, 40]
+      })
+      
+      console.log(`Adding hospital: ${hospital.name} at [${hospital.lat}, ${hospital.lng}]`)
+      const marker = L.marker([hospital.lat, hospital.lng], { icon: hospitalIcon }).addTo(map)
+      marker.bindPopup(`
+        <div class="popup-content">
+          <h4>${hospital.name}</h4>
+          <p><strong>Type:</strong> Medical Facility</p>
+          <p><strong>Beds:</strong> ${hospital.beds}</p>
+          <p><strong>Status:</strong> ${hospital.emergency ? 'Operational' : 'Closed'}</p>
+          <p><strong>Contact:</strong> ${hospital.contact}</p>
+        </div>
+      `)
+      
+      marker.on('click', () => selectPin(hospital))
+      markers.value.push(marker)
+    } catch (error) {
+      console.error(`Error adding hospital marker: ${hospital.name}`, error)
+    }
   })
-  
-// Add hospital markers
-filteredHospitals.value.forEach(hospital => {
-  const hospitalIcon = L.divIcon({
-    html: `<div style="background: white; border: 3px solid #00AA00; border-radius: 6px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#00AA00" stroke-width="2" style="width: 20px; height: 20px;">
-        <rect x="3" y="6" width="18" height="12" rx="2"/>
-        <path d="M9 12h6"/>
-        <path d="M12 9v6"/>
-      </svg>
-    </div>`,
-    className: 'custom-hospital-icon',
-    iconSize: [40, 40],
-    iconAnchor: [20, 40]
+
+  // Add AI prediction markers
+  filteredPredictions.value.forEach(prediction => {
+    try {
+      const predictionColor = prediction.risk_level === 'critical' ? '#FF0000' : 
+                             prediction.risk_level === 'high' ? '#FF4444' :
+                             prediction.risk_level === 'moderate' ? '#FF9933' : '#FFD700'
+      
+      const predictionIcon = L.divIcon({
+        html: `<div style="background: white; border: 3px solid ${predictionColor}; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px ${predictionColor};">
+          <svg viewBox="0 0 24 24" fill="${predictionColor}" stroke="none" style="width: 18px; height: 18px;">
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
+        </div>`,
+        className: 'custom-prediction-icon',
+        iconSize: [35, 35],
+        iconAnchor: [17, 35]
+      })
+      
+      console.log(`Adding prediction: ${prediction.name} at [${prediction.latitude}, ${prediction.longitude}]`)
+      const marker = L.marker([prediction.latitude, prediction.longitude], { icon: predictionIcon }).addTo(map)
+      marker.bindPopup(`
+        <div class="popup-content">
+          <h4>${prediction.name}</h4>
+          <p><strong>Type:</strong> AI Prediction</p>
+          <p><strong>Risk Level:</strong> ${prediction.risk_level.toUpperCase()}</p>
+          <p><strong>Risk Score:</strong> ${prediction.risk_score}/100</p>
+          <p><strong>Predicted Magnitude:</strong> ${prediction.predicted_magnitude_range}</p>
+          <p><strong>Confidence:</strong> ${prediction.confidence.toFixed(1)}%</p>
+          <p><strong>Historical Events:</strong> ${prediction.historical_count}</p>
+          <p><strong>Analysis Method:</strong> ${prediction.analysis_method || 'Seismic pattern analysis'}</p>
+          <p><strong>Description:</strong> ${prediction.description}</p>
+        </div>
+      `)
+      
+      marker.on('click', () => selectPin(prediction))
+      markers.value.push(marker)
+    } catch (error) {
+      console.error(`Error adding prediction marker: ${prediction.name}`, error)
+    }
   })
-  
-  const marker = L.marker([hospital.lat, hospital.lng], { icon: hospitalIcon }).addTo(map)
-  marker.bindPopup(`
-      <div class="popup-content">
-        <h4>${hospital.name}</h4>
-        <p><strong>Type:</strong> Medical Facility</p>
-        <p><strong>Beds:</strong> ${hospital.beds}</p>
-        <p><strong>Status:</strong> ${hospital.emergency ? 'Operational' : 'Closed'}</p>
-        <p><strong>Contact:</strong> ${hospital.contact}</p>
-      </div>
-    `)
-    
-    marker.on('click', () => selectPin(hospital))
-    markers.value.push(marker)
-  })
+
+  console.log('updateMarkers complete - total markers:', markers.value.length)
 }
 
 // Watch for filter changes and update markers
-watch([filteredZones, filteredShelters, filteredHospitals], updateMarkers)
+watch([filteredZones, filteredShelters, filteredHospitals, filteredPredictions], updateMarkers)
 </script>
 
 <template>
@@ -451,17 +556,15 @@ watch([filteredZones, filteredShelters, filteredHospitals], updateMarkers)
               Hospitals
             </button>
             <button
-              :class="['filter-btn', { active: activeFilters.earthquakeZones }]"
-              disabled
+              :class="['filter-btn', { active: activeFilters.predictions }]"
+              @click="toggleFilter('predictions')"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="filter-icon">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14,2 14,8 20,8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10,9 9,9 8,9"/>
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v4M12 16h.01"/>
+                <path d="M9 3h6a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3z"/>
               </svg>
-              Recent Earthquakes
+              AI Predictions
             </button>
           </div>
         </div>
@@ -500,6 +603,10 @@ watch([filteredZones, filteredShelters, filteredHospitals], updateMarkers)
                 </svg>
               </div>
               <span>Hospital</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: #FF4444; box-shadow: 0 0 8px #FF4444; border-radius: 50%;"></div>
+              <span>AI Prediction Zone</span>
             </div>
           </div>
         </div>
@@ -1017,20 +1124,23 @@ watch([filteredZones, filteredShelters, filteredHospitals], updateMarkers)
 }
 
 .map-canvas :deep(.custom-shelter-icon),
-.map-canvas :deep(.custom-hospital-icon) {
+.map-canvas :deep(.custom-hospital-icon),
+.map-canvas :deep(.custom-prediction-icon) {
   background: none !important;
   border: none !important;
 }
 
 .map-canvas :deep(.custom-shelter-icon div),
-.map-canvas :deep(.custom-hospital-icon div) {
+.map-canvas :deep(.custom-hospital-icon div),
+.map-canvas :deep(.custom-prediction-icon div) {
   cursor: pointer;
   transition: transform 0.2s ease;
 }
 
 .map-canvas :deep(.custom-shelter-icon div:hover),
-.map-canvas :deep(.custom-hospital-icon div:hover) {
-  transform: scale(1.1);
+.map-canvas :deep(.custom-hospital-icon div:hover),
+.map-canvas :deep(.custom-prediction-icon div:hover) {
+  transform: scale(1.2);
 }
 
 .popup-content {

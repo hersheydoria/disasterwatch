@@ -30,10 +30,10 @@
         </div>
 
         <section class="stats-grid small">
-          <div class="stat"> <div class="num">24</div> <div class="label">Total Shelters</div> </div>
-          <div class="stat green"> <div class="num">18</div> <div class="label">Active</div> </div>
-          <div class="stat"> <div class="num">2,450</div> <div class="label">Total Capacity</div> </div>
-          <div class="stat red"> <div class="num">3</div> <div class="label">At Capacity</div> </div>
+          <div class="stat"> <div class="num">{{ shelters.length }}</div> <div class="label">Total Shelters</div> </div>
+          <div class="stat green"> <div class="num">{{ shelters.filter(s => s.status === 'active').length }}</div> <div class="label">Active</div> </div>
+          <div class="stat"> <div class="num">{{ shelters.reduce((sum, s) => sum + s.capacity, 0) }}</div> <div class="label">Total Capacity</div> </div>
+          <div class="stat red"> <div class="num">{{ shelters.filter(s => s.status === 'full').length }}</div> <div class="label">At Capacity</div> </div>
         </section>
 
         <section class="table-panel">
@@ -51,102 +51,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>
-                    <div class="shelter-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 6l8-4 8 4v12l-8 4-8-4V6z"/>
-                        <path d="M9 10l6 3"/>
-                        <path d="M9 14l6 3"/>
-                      </svg>
-                    </div>
-                    <div class="s-name">Central High School<div class="sub">Primary Shelter</div></div>
-                  </td>
-                  <td><div class="loc">1234 Main Street</div><div class="muted">Downtown District</div></td>
-                  <td><span class="pill active">Active</span></td>
-                  <td>500</td>
-                  <td>
-                    <div class="capacity-bar">
-                      <div class="fill" style="width:47%; background:#ff9e64"></div>
-                    </div>
-                    <div class="num">234</div>
-                  </td>
-                  <td><a class="edit" href="#" @click.prevent="editShelter('Central High School')">Edit →</a></td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="shelter-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="4" y="2" width="16" height="20" rx="2" ry="2"/>
-                        <rect x="9" y="6" width="6" height="4"/>
-                        <rect x="9" y="12" width="6" height="4"/>
-                        <line x1="7" y1="6" x2="7" y2="6"/>
-                        <line x1="7" y1="12" x2="7" y2="12"/>
-                        <line x1="17" y1="6" x2="17" y2="6"/>
-                        <line x1="17" y1="12" x2="17" y2="12"/>
-                      </svg>
-                    </div>
-                    <div class="s-name">Community Center East<div class="sub">Secondary Shelter</div></div>
-                  </td>
-                  <td><div class="loc">567 Oak Avenue</div><div class="muted">East Side</div></td>
-                  <td><span class="pill active">Active</span></td>
-                  <td>200</td>
-                  <td>
-                    <div class="capacity-bar">
-                      <div class="fill" style="width:44%; background:#10b981"></div>
-                    </div>
-                    <div class="num">89</div>
-                  </td>
-                  <td><a class="edit" href="#" @click.prevent="editShelter('Community Center East')">Edit →</a></td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="shelter-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                        <circle cx="12" cy="12" r="8"/>
-                        <path d="M12 8v4"/>
-                        <path d="M10 10h4"/>
-                      </svg>
-                    </div>
-                    <div class="s-name">St. Mary's Church<div class="sub">Emergency Shelter</div></div>
-                  </td>
-                  <td><div class="loc">890 Pine Street</div><div class="muted">West District</div></td>
-                  <td><span class="pill full">Full</span></td>
-                  <td>150</td>
-                  <td>
-                    <div class="capacity-bar">
-                      <div class="fill" style="width:100%; background:#ef4444"></div>
-                    </div>
-                    <div class="num">150</div>
-                  </td>
-                  <td><a class="edit" href="#" @click.prevent="editShelter('St. Mary\'s Church')">Edit →</a></td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="shelter-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14,2 14,8 20,8"/>
-                        <line x1="16" y1="13" x2="8" y2="13"/>
-                        <line x1="16" y1="17" x2="8" y2="17"/>
-                        <polyline points="10,9 9,9 8,9"/>
-                      </svg>
-                    </div>
-                    <div class="s-name">Riverside Park Pavilion<div class="sub">Emergency Shelter</div></div>
-                  </td>
-                  <td><div class="loc">123 River Road</div><div class="muted">Riverside</div></td>
-                  <td><span class="pill inactive">Inactive</span></td>
-                  <td>75</td>
-                  <td>
-                    <div class="capacity-bar">
-                      <div class="fill" style="width:0%; background:#d1d5db"></div>
-                    </div>
-                    <div class="num">0</div>
-                  </td>
-                  <td><a class="edit" href="#" @click.prevent="editShelter('Riverside Park Pavilion')">Edit →</a></td>
-                </tr>
-                <tr>
+                <tr v-for="shelter in filteredShelters" :key="shelter.id">
                   <td>
                     <div class="shelter-icon">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -154,18 +59,18 @@
                         <polyline points="9,22 9,12 15,12 15,22"/>
                       </svg>
                     </div>
-                    <div class="s-name">Sports Complex Arena<div class="sub">Large Capacity Shelter</div></div>
+                    <div class="s-name">{{ shelter.name }}<div class="sub">{{ shelter.shelter_type }}</div></div>
                   </td>
-                  <td><div class="loc">456 Stadium Drive</div><div class="muted">Sports District</div></td>
-                  <td><span class="pill active">Active</span></td>
-                  <td>800</td>
+                  <td><div class="loc">{{ shelter.address }}</div><div class="muted">{{ shelter.region }}</div></td>
+                  <td><span :class="['pill', shelter.status === 'active' ? 'active' : shelter.status === 'full' ? 'full' : 'inactive']">{{ shelter.status === 'active' ? 'Active' : shelter.status === 'full' ? 'Full' : 'Inactive' }}</span></td>
+                  <td>{{ shelter.max_capacity }}</td>
                   <td>
                     <div class="capacity-bar">
-                      <div class="fill" style="width:39%; background:#3b82f6"></div>
+                      <div class="fill" :style="{width: Math.round((shelter.current_occupancy / shelter.max_capacity) * 100) + '%', background: shelter.status === 'active' ? '#3b82f6' : shelter.status === 'full' ? '#ef4444' : '#d1d5db'}"></div>
                     </div>
-                    <div class="num">312</div>
+                    <div class="num">{{ shelter.current_occupancy }}</div>
                   </td>
-                  <td><a class="edit" href="#" @click.prevent="editShelter('Sports Complex Arena')">Edit →</a></td>
+                  <td><a class="edit" href="#" @click.prevent="editShelter(shelter.name)">Edit →</a></td>
                 </tr>
               </tbody>
             </table>
@@ -186,32 +91,85 @@
 </template>
 
 <script setup>
-import { inject } from 'vue'
+import { inject, reactive, onMounted, ref } from 'vue'
+import { getShelters } from '../api/client'
 
 const navigate = inject('navigate', () => {})
+
+const shelters = ref([])
+const filteredShelters = ref([])
+const loading = ref(false)
+const searchQuery = ref('')
+const statusFilter = ref('all')
+
+onMounted(async () => {
+  await loadShelters()
+})
+
+async function loadShelters() {
+  loading.value = true
+  try {
+    const response = await getShelters(1)
+    const data = response.results || response
+    shelters.value = Array.isArray(data) ? data : []
+    filteredShelters.value = shelters.value
+  } catch (error) {
+    console.error('Error loading shelters:', error)
+    shelters.value = []
+    filteredShelters.value = []
+  } finally {
+    loading.value = false
+  }
+}
 
 function addShelter() {
   navigate('add-shelter')
 }
 
-function editShelter(shelterId) {
-  console.log(`Editing shelter: ${shelterId}`)
+function editShelter(shelter) {
+  console.log(`Editing shelter: ${shelter.name}`)
   // Can be expanded to navigate to edit form with shelter data
 }
 
-function refreshData() {
+async function refreshData() {
   console.log('Refreshing shelter data...')
-  // Can be expanded to fetch latest data from API
+  await loadShelters()
+  filterShelters()
 }
 
 function handleSearch(event) {
-  console.log('Search query:', event.target.value)
-  // Can be expanded to filter shelters based on search
+  searchQuery.value = event.target.value.toLowerCase()
+  filterShelters()
 }
 
 function handleStatusFilter(event) {
-  console.log('Status filter:', event.target.value)
-  // Can be expanded to filter shelters by status
+  statusFilter.value = event.target.value.toLowerCase()
+  filterShelters()
+}
+
+function filterShelters() {
+  let filtered = shelters.value
+
+  if (searchQuery.value) {
+    filtered = filtered.filter(s => 
+      s.name.toLowerCase().includes(searchQuery.value) ||
+      s.address.toLowerCase().includes(searchQuery.value)
+    )
+  }
+
+  if (statusFilter.value !== 'all status' && statusFilter.value !== 'all') {
+    filtered = filtered.filter(s => s.status.toLowerCase() === statusFilter.value)
+  }
+
+  filteredShelters.value = filtered
+}
+
+function getCapacityColor(current, capacity) {
+  const percentage = (current / capacity) * 100
+  if (percentage >= 100) return '#ef4444'
+  if (percentage >= 75) return '#ff9e64'
+  if (percentage >= 50) return '#3b82f6'
+  return '#10b981'
 }
 </script>
 

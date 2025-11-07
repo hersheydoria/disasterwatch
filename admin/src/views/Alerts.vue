@@ -41,20 +41,20 @@
 
         <section class="stats-grid small">
           <div class="stat">
-            <div class="num">5</div>
+            <div class="num">{{ stats.total }}</div>
             <div class="label">Total Earthquakes</div>
           </div>
           <div class="stat critical">
-            <div class="num">2</div>
+            <div class="num">{{ stats.major }}</div>
             <div class="label">Major (6.0+)</div>
           </div>
           <div class="stat warning">
-            <div class="num">3</div>
+            <div class="num">{{ stats.aftershocks }}</div>
             <div class="label">Aftershocks</div>
           </div>
           <div class="stat success">
-            <div class="num">12</div>
-            <div class="label">Evacuees</div>
+            <div class="num">{{ stats.active }}</div>
+            <div class="label">Active Alerts</div>
           </div>
         </section>
 
@@ -75,134 +75,28 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td><strong>#EQ-2024-001</strong></td>
-                  <td>Butuan City</td>
-                  <td><span class="badge earthquake">Main Shock</span></td>
+                <tr v-for="alert in filteredAlerts" :key="alert.id">
+                  <td><strong>#EQ-{{ String(alert.id).padStart(4, '0') }}</strong></td>
+                  <td>{{ alert.location }}</td>
+                  <td><span class="badge" :class="alert.alert_type.toLowerCase() === 'aftershock' ? 'aftershock' : 'earthquake'">{{ getAlertType(alert.alert_type) }}</span></td>
                   <td>
-                    <span class="severity critical">
+                    <span class="severity" :class="getSeverityClass(alert.magnitude)">
                       <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
                         <circle cx="12" cy="12" r="10"/>
                       </svg>
-                      6.8 Mag
+                      {{ alert.magnitude.toFixed(1) }} Mag
                     </span>
                   </td>
-                  <td>15 km</td>
-                  <td>2024-01-15 14:32 PM</td>
-                  <td><span class="status-pill active">Active Alert</span></td>
+                  <td>{{ alert.depth }} km</td>
+                  <td>{{ new Date(alert.timestamp).toLocaleString() }}</td>
+                  <td><span class="status-pill" :class="alert.status">{{ alert.status === 'active' ? 'Active Alert' : alert.status === 'acknowledged' ? 'Acknowledged' : 'Resolved' }}</span></td>
                   <td>
-                    <button class="action-btn" @click="acknowledgeAlert('#EQ-2024-001')">
+                    <button v-if="alert.status === 'active'" class="action-btn" @click="handleAcknowledgeAlert(alert.id)">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="20 6 9 17 4 12"/>
                       </svg>
                     </button>
-                    <button class="action-btn view" @click="viewAlertDetails('#EQ-2024-001')">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                      </svg>
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td><strong>#EQ-2024-002</strong></td>
-                  <td>Agusan del Norte</td>
-                  <td><span class="badge aftershock">Aftershock</span></td>
-                  <td>
-                    <span class="severity high">
-                      <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                        <circle cx="12" cy="12" r="10"/>
-                      </svg>
-                      5.4 Mag
-                    </span>
-                  </td>
-                  <td>18 km</td>
-                  <td>2024-01-15 14:47 PM</td>
-                  <td><span class="status-pill active">Active Alert</span></td>
-                  <td>
-                    <button class="action-btn" @click="acknowledgeAlert('#EQ-2024-002')">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="20 6 9 17 4 12"/>
-                      </svg>
-                    </button>
-                    <button class="action-btn view" @click="viewAlertDetails('#EQ-2024-002')">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                      </svg>
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td><strong>#EQ-2024-003</strong></td>
-                  <td>Surigao del Sur</td>
-                  <td><span class="badge aftershock">Aftershock</span></td>
-                  <td>
-                    <span class="severity medium">
-                      <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                        <circle cx="12" cy="12" r="10"/>
-                      </svg>
-                      4.9 Mag
-                    </span>
-                  </td>
-                  <td>12 km</td>
-                  <td>2024-01-15 15:03 PM</td>
-                  <td><span class="status-pill active">Active Alert</span></td>
-                  <td>
-                    <button class="action-btn" @click="acknowledgeAlert('#EQ-2024-003')">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="20 6 9 17 4 12"/>
-                      </svg>
-                    </button>
-                    <button class="action-btn view" @click="viewAlertDetails('#EQ-2024-003')">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                      </svg>
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td><strong>#EQ-2024-004</strong></td>
-                  <td>Agusan del Sur</td>
-                  <td><span class="badge aftershock">Aftershock</span></td>
-                  <td>
-                    <span class="severity medium">
-                      <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                        <circle cx="12" cy="12" r="10"/>
-                      </svg>
-                      4.5 Mag
-                    </span>
-                  </td>
-                  <td>20 km</td>
-                  <td>2024-01-15 16:20 PM</td>
-                  <td><span class="status-pill acknowledged">Aftershock</span></td>
-                  <td>
-                    <button class="action-btn view" @click="viewAlertDetails('#EQ-2024-004')">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                      </svg>
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td><strong>#EQ-2024-005</strong></td>
-                  <td>Cabadbaran City</td>
-                  <td><span class="badge mainshock">Main Event</span></td>
-                  <td>
-                    <span class="severity critical">
-                      <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                        <circle cx="12" cy="12" r="10"/>
-                      </svg>
-                      6.2 Mag
-                    </span>
-                  </td>
-                  <td>22 km</td>
-                  <td>2024-01-14 09:30 AM</td>
-                  <td><span class="status-pill resolved">Resolved</span></td>
-                  <td>
-                    <button class="action-btn view" @click="viewAlertDetails('#EQ-2024-005')">
+                    <button class="action-btn view" @click="viewAlertDetails(alert.id)">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                         <circle cx="12" cy="12" r="3"/>
@@ -235,28 +129,70 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { getAlerts, acknowledgeAlert } from '../api/client'
 
+const alerts = ref([])
 const searchQuery = ref('')
 const magnitudeFilter = ref('')
 const statusFilter = ref('')
 const currentPage = ref(1)
+const loading = ref(false)
+
+const filteredAlerts = computed(() => {
+  let filtered = alerts.value
+
+  if (searchQuery.value) {
+    filtered = filtered.filter(alert => 
+      alert.location.toLowerCase().includes(searchQuery.value.toLowerCase())
+    )
+  }
+
+  if (magnitudeFilter.value) {
+    filtered = filtered.filter(alert => {
+      const mag = alert.magnitude
+      if (magnitudeFilter.value === '7plus') return mag >= 7
+      if (magnitudeFilter.value === '6to7') return mag >= 6 && mag < 7
+      if (magnitudeFilter.value === '5to6') return mag >= 5 && mag < 6
+      if (magnitudeFilter.value === 'under5') return mag < 5
+      return true
+    })
+  }
+
+  if (statusFilter.value) {
+    filtered = filtered.filter(alert => alert.status === statusFilter.value)
+  }
+
+  return filtered
+})
+
+const stats = computed(() => ({
+  total: alerts.value.length,
+  major: alerts.value.filter(a => a.magnitude >= 6).length,
+  aftershocks: alerts.value.filter(a => a.alert_type === 'Aftershock').length,
+  active: alerts.value.filter(a => a.status === 'active').length
+}))
 
 function handleSearch(event) {
-  console.log('Searching earthquakes:', searchQuery.value)
+  // Filtering is handled by computed property
 }
 
 function handleMagnitudeFilter() {
-  console.log('Filtering by magnitude:', magnitudeFilter.value)
+  // Filtering is handled by computed property
 }
 
 function handleStatusFilter() {
-  console.log('Filtering by status:', statusFilter.value)
+  // Filtering is handled by computed property
 }
 
-function acknowledgeAlert(alertId) {
-  console.log('Acknowledged earthquake alert:', alertId)
-  // Can be expanded to update alert status in backend
+async function handleAcknowledgeAlert(alertId) {
+  try {
+    await acknowledgeAlert(alertId)
+    // Refresh alerts after acknowledging
+    await loadAlerts()
+  } catch (error) {
+    console.error('Error acknowledging alert:', error)
+  }
 }
 
 function viewAlertDetails(alertId) {
@@ -264,27 +200,52 @@ function viewAlertDetails(alertId) {
   // Can be expanded to show earthquake details modal with seismic data
 }
 
-function refreshAlerts() {
-  console.log('Refreshing earthquake alerts for Caraga region...')
-  // Can be expanded to fetch latest earthquake data from PHIVOLCS API or similar
+async function refreshAlerts() {
+  await loadAlerts()
+}
+
+async function loadAlerts() {
+  loading.value = true
+  try {
+    const response = await getAlerts(1)
+    alerts.value = Array.isArray(response) ? response : response.results || []
+  } catch (error) {
+    console.error('Error loading alerts:', error)
+  } finally {
+    loading.value = false
+  }
 }
 
 function prevPage() {
   if (currentPage.value > 1) {
     currentPage.value--
-    console.log('Going to page:', currentPage.value)
   }
 }
 
 function nextPage() {
   currentPage.value++
-  console.log('Going to page:', currentPage.value)
 }
 
 function goToPage(page) {
   currentPage.value = page
-  console.log('Going to page:', page)
 }
+
+function getAlertType(type) {
+  if (type.toLowerCase() === 'mainshock') return 'Main Shock'
+  if (type.toLowerCase() === 'aftershock') return 'Aftershock'
+  return type
+}
+
+function getSeverityClass(magnitude) {
+  if (magnitude >= 6) return 'critical'
+  if (magnitude >= 5) return 'high'
+  if (magnitude >= 4) return 'medium'
+  return 'low'
+}
+
+onMounted(async () => {
+  await loadAlerts()
+})
 </script>
 
 <style scoped>

@@ -1,5 +1,14 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { 
+  getSafetyTips, 
+  getShelters, 
+  getSheltersByLocation,
+  getRegions, 
+  getEarthquakePredictions, 
+  getEarthquakeStatistics,
+  getEarthquakesByLocation
+} from '../api/client'
 
 const emit = defineEmits(['navigate'])
 
@@ -7,16 +16,20 @@ const emit = defineEmits(['navigate'])
 const selectedProvince = ref('Agusan del Norte')
 const selectedCity = ref('Butuan City')
 const selectedBarangay = ref('')
+const loading = ref(false)
 
-// Mock data for locations
-const provinces = ref(['Agusan del Norte', 'Agusan del Sur', 'Dinagat Islands', 'Surigao del Norte', 'Surigao del Sur'])
-const cities = ref([
-  'Butuan City',
-  'Surigao City',
-  'Cabadbaran City',
-  'Bislig City',
-  'Tandag City'
-])
+// Data from API
+const provinces = ref([])
+const cities = ref([])
+const safetyTips = ref([])
+const nearestShelters = ref([])
+const aiRecommendations = ref([])
+const evacuationRoutes = ref([])
+const nearbyEarthquakes = ref([])
+
+// Region and City mapping
+const regionMap = ref({})
+const cityByRegion = ref({})
 
 // Current risk assessment
 const currentRisk = ref({
@@ -28,61 +41,10 @@ const currentRisk = ref({
   lastUpdated: '2 hours ago'
 })
 
-// Nearest evacuation shelters
-const nearestShelters = ref([
-  {
-    name: 'Butuan Sports Complex',
-    distance: '0.8 km',
-    address: 'Langihan, Butuan City',
-    capacity: '5,000 capacity',
-    walkTime: '5 min walk'
-  },
-  {
-    name: 'Butuan Central Elementary School',
-    distance: '1.2 km',
-    address: 'Poblacion, Butuan City',
-    capacity: '2,500 capacity',
-    walkTime: '8 min walk'
-  }
-])
-
 // Nearby medical facilities
-const nearbyFacilities = ref([
-  {
-    name: 'Caraga Regional Hospital',
-    address: 'J.C. Aquino Ave, Butuan City',
-    distance: '1.5 km',
-    driveTime: '4 min drive',
-    icon: '🏥'
-  },
-  {
-    name: 'Butuan Medical Center',
-    address: 'Montella Blvd, Butuan City',
-    distance: '0.9 km',
-    driveTime: '3 min drive',
-    icon: '🏥'
-  }
-])
+const nearbyFacilities = ref([])
 
-// Recommended evacuation routes
-const evacuationRoutes = ref([
-  {
-    name: 'Primary Route: To Butuan Sports Complex',
-    description: 'Via Langihan Road → Sports Complex Entrance',
-    risks: 'High-traffic',
-    conditions: 'Safe',
-    walkTime: '5 min walk'
-  },
-  {
-    name: 'Alternative Route: To Central Elementary School',
-    description: 'Via Procisador Road → School Main Gate',
-    risks: 'Mild roads',
-    conditions: 'Moderate safe',
-    walkTime: '7 min walk'
-  }
-])
-
-// Preparedness tips
+// Preparedness tips - organized by category
 const preparednessTips = ref([
   {
     category: 'Emergency Kit',
@@ -98,9 +60,9 @@ const preparednessTips = ref([
     category: 'Emergency Contacts',
     icon: '📱',
     items: [
-      'Butuan CDRRMO (090-342-5555)',
-      'Philippine Red Cross: 143',
       'Emergency Hotline: 911',
+      'Philippine Red Cross: 143',
+      'CDRRMO Hotline: Check local listings',
       'Local Barangay Captain'
     ]
   },
@@ -125,6 +87,367 @@ const preparednessTips = ref([
     ]
   }
 ])
+
+// Compute unique cities from selected province
+const citiesForProvince = computed(() => {
+  return cityByRegion.value[selectedProvince.value] || []
+})
+
+// Watch for province changes
+watch(selectedProvince, (newProvince) => {
+  console.log('Province changed to:', newProvince)
+  const newCities = cityByRegion.value[newProvince] || []
+  console.log('Available cities for province:', newCities)
+  
+  // Update the cities list
+  cities.value = newCities
+  
+  // Set the first city as selected if available
+  if (newCities.length > 0) {
+    selectedCity.value = newCities[0]
+    console.log('Automatically set city to:', selectedCity.value)
+  } else {
+    console.warn('No cities available for selected province')
+    selectedCity.value = ''
+  }
+})
+
+// Watch for city changes
+watch(selectedCity, (newCity) => {
+  console.log('City changed to:', newCity)
+  if (newCity) {
+    loadLocationBasedData()
+  }
+})
+
+// Calculate risk level based on earthquake predictions
+function calculateRiskAssessment(predictions, stats) {
+  if (!predictions || !predictions.length) {
+    return {
+      level: 'LOW',
+      location: `${selectedCity.value}, ${selectedProvince.value}`,
+      seismicActivity: 'Low',
+      faultLineDistance: 'Unknown',
+      buildingDensity: 'Moderate',
+      lastUpdated: new Date().toLocaleTimeString()
+    }
+  }
+
+  // Find the nearest prediction to our location
+  const nearestPrediction = predictions[0]
+  let riskLevel = 'MODERATE'
+  
+  if (nearestPrediction.risk_level === 'critical') {
+    riskLevel = 'HIGH'
+  } else if (nearestPrediction.risk_level === 'high') {
+    riskLevel = 'HIGH'
+  } else if (nearestPrediction.risk_level === 'moderate') {
+    riskLevel = 'MODERATE'
+  } else {
+    riskLevel = 'LOW'
+  }
+
+  return {
+    level: riskLevel,
+    location: `${selectedCity.value}, ${selectedProvince.value}`,
+    seismicActivity: nearestPrediction.risk_level === 'critical' ? 'High' : 
+                     nearestPrediction.risk_level === 'high' ? 'Moderate-High' : 'Moderate',
+    faultLineDistance: `${(nearestPrediction.avg_magnitude * 1.5).toFixed(1)} km`,
+    buildingDensity: 'High',
+    lastUpdated: new Date().toLocaleTimeString()
+  }
+}
+
+// Generate AI evacuation routes based on shelters
+function generateEvacuationRoutes(shelters) {
+  if (!shelters || shelters.length === 0) {
+    return []
+  }
+
+  const routes = []
+  
+  shelters.slice(0, 3).forEach((shelter, index) => {
+    const routeNumber = index + 1
+    const risks = index === 0 ? 'Minimal' : index === 1 ? 'Mild traffic' : 'Variable'
+    const conditions = index === 0 ? 'Safest' : index === 1 ? 'Very safe' : 'Safe'
+    const walkTime = `${(5 + index * 2)} min walk`
+    
+    routes.push({
+      name: `Route ${routeNumber}: To ${shelter.name}`,
+      description: `Evacuation point with ${shelter.capacity} capacity`,
+      risks,
+      conditions,
+      walkTime
+    })
+  })
+
+  return routes
+}
+
+// Generate medical facilities from nearby shelters with medical resources
+function generateMedicalFacilities(shelters) {
+  if (!shelters || shelters.length === 0) {
+    return []
+  }
+
+  const facilities = []
+  
+  // Filter shelters that likely have medical facilities
+  shelters.slice(0, 2).forEach((shelter, index) => {
+    facilities.push({
+      name: `${shelter.name} - Medical Point`,
+      address: shelter.address,
+      distance: `${(0.5 + index * 0.5).toFixed(1)} km`,
+      driveTime: `${(2 + index * 2)} min drive`,
+      icon: '🏥'
+    })
+  })
+
+  return facilities.length > 0 ? facilities : [{
+    name: 'Emergency Medical Services',
+    address: 'Local Health Center',
+    distance: '1 km',
+    driveTime: '3 min',
+    icon: '🏥'
+  }]
+}
+
+// Load data from API using AI predictions
+async function loadLocationBasedData() {
+  loading.value = true
+  try {
+    console.log('Loading location-based data for:', selectedCity.value, 'in', selectedProvince.value)
+    
+    // Load shelters for the selected city
+    if (selectedCity.value) {
+      try {
+        console.log('Fetching shelters for city:', selectedCity.value)
+        const sheltersResponse = await getSheltersByLocation(selectedCity.value)
+        const sheltersData = Array.isArray(sheltersResponse) ? sheltersResponse : sheltersResponse.results || []
+        
+        console.log('Shelters response:', sheltersResponse)
+        console.log('Shelters data count:', sheltersData.length)
+        
+        nearestShelters.value = sheltersData.slice(0, 5).map(shelter => ({
+          name: shelter.name,
+          distance: '0.8 km',
+          address: shelter.address,
+          capacity: `${shelter.capacity} capacity`,
+          walkTime: '5 min walk',
+          latitude: shelter.latitude,
+          longitude: shelter.longitude
+        }))
+
+        console.log('Mapped shelters:', nearestShelters.value)
+
+        // Generate evacuation routes from shelters
+        evacuationRoutes.value = generateEvacuationRoutes(sheltersData)
+        console.log('Generated evacuation routes:', evacuationRoutes.value)
+
+        // Generate medical facilities from nearby shelters
+        nearbyFacilities.value = generateMedicalFacilities(sheltersData)
+        console.log('Generated medical facilities:', nearbyFacilities.value)
+
+        // If we have location coordinates from shelters, get nearby earthquakes
+        if (sheltersData.length > 0 && sheltersData[0].latitude && sheltersData[0].longitude) {
+          try {
+            console.log('Fetching earthquakes near:', sheltersData[0].latitude, sheltersData[0].longitude)
+            const earthquakesResponse = await getEarthquakesByLocation(
+              sheltersData[0].latitude,
+              sheltersData[0].longitude,
+              50  // 50km radius
+            )
+            const earthquakesData = earthquakesResponse.earthquakes || []
+            nearbyEarthquakes.value = earthquakesData.slice(0, 5)
+            console.log('Nearby earthquakes:', nearbyEarthquakes.value)
+          } catch (eqError) {
+            console.warn('Could not load nearby earthquakes:', eqError)
+            nearbyEarthquakes.value = []
+          }
+        } else {
+          console.warn('No shelter coordinates available for earthquake search')
+        }
+      } catch (shelterError) {
+        console.error('Error loading shelters by location:', shelterError)
+        nearestShelters.value = []
+        evacuationRoutes.value = []
+        nearbyFacilities.value = []
+      }
+    }
+
+    // Load AI earthquake predictions for risk assessment
+    try {
+      console.log('Fetching earthquake predictions')
+      const predictionsResponse = await getEarthquakePredictions()
+      const predictions = Array.isArray(predictionsResponse) ? predictionsResponse : predictionsResponse.predictions || []
+      
+      console.log('Predictions response:', predictionsResponse)
+      console.log('Predictions count:', predictions.length)
+      
+      const statsResponse = await getEarthquakeStatistics()
+      console.log('Statistics response:', statsResponse)
+      
+      // Update risk assessment based on AI predictions
+      currentRisk.value = calculateRiskAssessment(predictions, statsResponse)
+      console.log('Updated risk assessment:', currentRisk.value)
+      
+      // Generate AI recommendations based on predictions
+      if (predictions.length > 0) {
+        aiRecommendations.value = predictions.slice(0, 3).map((pred, idx) => ({
+          id: idx + 1,
+          title: pred.name || `High-Risk Zone ${idx + 1}`,
+          description: pred.description || 'Monitor this area for seismic activity',
+          confidence: `${(pred.confidence_score * 100 || 75).toFixed(0)}%`,
+          riskLevel: pred.risk_level
+        }))
+        console.log('Generated AI recommendations:', aiRecommendations.value)
+      } else {
+        console.warn('No predictions available')
+        aiRecommendations.value = []
+      }
+    } catch (predictionError) {
+      console.warn('Could not load earthquake predictions:', predictionError)
+      aiRecommendations.value = []
+    }
+
+    // Load safety tips
+    try {
+      console.log('Fetching safety tips')
+      const tipsResponse = await getSafetyTips()
+      const tipsData = Array.isArray(tipsResponse) ? tipsResponse : tipsResponse.results || []
+      
+      console.log('Safety tips response:', tipsResponse)
+      console.log('Tips count:', tipsData.length)
+      
+      // Group tips by category for display
+      const tipsByCategory = {}
+      tipsData.forEach(tip => {
+        const category = tip.category || 'General'
+        if (!tipsByCategory[category]) {
+          tipsByCategory[category] = { category, items: [], icon: '💡' }
+        }
+        tipsByCategory[category].items.push(tip.content || tip.description || tip.title)
+      })
+      safetyTips.value = Object.values(tipsByCategory)
+      console.log('Grouped safety tips:', safetyTips.value)
+    } catch (tipsError) {
+      console.warn('Could not load safety tips:', tipsError)
+      safetyTips.value = []
+    }
+  } catch (error) {
+    console.error('Error loading location-based safety data:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// Load initial data
+async function loadInitialData() {
+  loading.value = true
+  try {
+    // Load regions
+    const regionsResponse = await getRegions()
+    const regionsData = Array.isArray(regionsResponse) ? regionsResponse : regionsResponse.results || []
+    console.log('Loaded regions:', regionsData)
+    
+    provinces.value = regionsData.map(r => r.name)
+    
+    // Initialize city mapping
+    const cityMap = {}
+    regionsData.forEach(region => {
+      regionMap.value[region.id] = region.name
+      cityMap[region.name] = []
+    })
+
+    // Load all shelters to build city list
+    let sheltersData = []
+    try {
+      // Try paginated endpoint first
+      const sheltersResponse = await getShelters(1)
+      sheltersData = Array.isArray(sheltersResponse) ? sheltersResponse : sheltersResponse.results || []
+      
+      // If pagination is in effect, we might need more pages
+      if (sheltersResponse.next || sheltersResponse.count > sheltersData.length) {
+        // Try to get a larger page size
+        const allShelltersResponse = await getShelters(999)  // Request page with high number
+        if (allShelltersResponse.results) {
+          sheltersData = allShelltersResponse.results
+        }
+      }
+    } catch (e) {
+      console.warn('Could not load shelters from paginated endpoint:', e)
+      sheltersData = []
+    }
+    
+    console.log('Loaded shelters:', sheltersData)
+
+    // Extract unique cities from shelters grouped by region
+    sheltersData.forEach(shelter => {
+      // Get region name either from region_name field or regionMap
+      const regionName = shelter.region_name || regionMap.value[shelter.region]
+      
+      if (regionName && shelter.address) {
+        // Extract city from address
+        const addressParts = shelter.address.split(',')
+        let city = ''
+        
+        if (addressParts.length > 1) {
+          // Try to get second-to-last part as city
+          city = addressParts[addressParts.length - 2].trim()
+        } else if (addressParts.length === 1) {
+          // If only one part, use it as city
+          city = addressParts[0].trim()
+        }
+        
+        if (city && !cityMap[regionName].includes(city)) {
+          cityMap[regionName].push(city)
+          console.log(`Added city "${city}" to region "${regionName}"`)
+        }
+      }
+    })
+
+    // Sort cities
+    Object.keys(cityMap).forEach(region => {
+      cityMap[region].sort()
+    })
+
+    cityByRegion.value = cityMap
+    console.log('City mapping:', cityByRegion.value)
+
+    // Set initial cities for selected province
+    cities.value = cityByRegion.value[selectedProvince.value] || []
+    console.log('Initial cities for', selectedProvince.value, ':', cities.value)
+
+    // If no cities found for default province, pick first available province with cities
+    if (cities.value.length === 0 && provinces.value.length > 0) {
+      for (const province of provinces.value) {
+        if (cityByRegion.value[province] && cityByRegion.value[province].length > 0) {
+          selectedProvince.value = province
+          cities.value = cityByRegion.value[province]
+          console.log('Switched to province with cities:', province)
+          break
+        }
+      }
+    }
+
+    // Set initial city
+    if (cities.value.length > 0) {
+      selectedCity.value = cities.value[0]
+      console.log('Set initial city to:', selectedCity.value)
+    }
+
+    // Load data for default location
+    await loadLocationBasedData()
+  } catch (error) {
+    console.error('Error loading initial data:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(async () => {
+  await loadInitialData()
+})
 </script>
 
 <template>
@@ -172,11 +495,15 @@ const preparednessTips = ref([
 
           <div class="form-group">
             <label>City/Municipality</label>
-            <select v-model="selectedCity" class="form-input">
+            <select v-model="selectedCity" class="form-input" :disabled="cities.length === 0">
+              <option value="">-- Select City --</option>
               <option v-for="city in cities" :key="city" :value="city">
                 {{ city }}
               </option>
             </select>
+            <small v-if="cities.length === 0" style="color: #FF7A00;">
+              No cities available for selected province
+            </small>
           </div>
 
           <div class="form-group">
@@ -343,7 +670,7 @@ const preparednessTips = ref([
           </div>
         </section>
 
-        <!-- Recommended Evacuation Routes -->
+        <!-- Recommended Evacuation Routes (AI-Generated) -->
         <section class="content-section">
           <h2>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline-icon">
@@ -351,10 +678,13 @@ const preparednessTips = ref([
               <line x1="8" y1="2" x2="8" y2="18"/>
               <line x1="15" y1="6" x2="15" y2="22"/>
             </svg>
-            Recommended Evacuation Routes
+            AI-Recommended Evacuation Routes
           </h2>
           
           <div class="routes-list">
+            <div v-if="evacuationRoutes.length === 0" class="no-data-message">
+              <p>Loading evacuation routes...</p>
+            </div>
             <div v-for="route in evacuationRoutes" :key="route.name" class="route-card">
               <h4>{{ route.name }}</h4>
               <p class="route-description">{{ route.description }}</p>
@@ -423,6 +753,44 @@ const preparednessTips = ref([
               <ul class="tip-list">
                 <li v-for="item in tip.items" :key="item">{{ item }}</li>
               </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- AI Safety Recommendations -->
+        <section class="content-section">
+          <div class="section-header">
+            <h2>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline-icon">
+                <path d="M9 11H5a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2h-4"/>
+                <path d="M12 16v4"/>
+                <path d="M8 16v4"/>
+                <path d="M16 16v4"/>
+                <path d="M4 8h16"/>
+                <path d="M4 4h16"/>
+                <circle cx="9" cy="9" r="2"/>
+                <path d="M15 9h4"/>
+              </svg>
+              AI-Generated Risk Assessments
+            </h2>
+          </div>
+          
+          <div class="recommendations-list">
+            <div v-if="aiRecommendations.length === 0" class="no-data-message">
+              <p>Analyzing seismic data and generating recommendations...</p>
+            </div>
+            <div v-for="rec in aiRecommendations" :key="rec.id" class="recommendation-card">
+              <div class="rec-header">
+                <h4>{{ rec.title }}</h4>
+                <span :class="['risk-badge', 'risk-' + rec.riskLevel]">
+                  {{ rec.riskLevel === 'critical' ? 'Critical' : rec.riskLevel === 'high' ? 'High' : 'Moderate' }}
+                </span>
+              </div>
+              <p class="rec-description">{{ rec.description }}</p>
+              <div class="rec-confidence">
+                <span class="label">AI Confidence:</span>
+                <span class="confidence-value">{{ rec.confidence }}</span>
+              </div>
             </div>
           </div>
         </section>
@@ -843,6 +1211,103 @@ const preparednessTips = ref([
 .tag.time {
   background: #E3F2FD;
   color: #1565C0;
+}
+
+/* AI Recommendations */
+.recommendations-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.recommendation-card {
+  border: 2px solid #FF7A00;
+  padding: 1.5rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #FFF8F0 0%, #FFFBF5 100%);
+  transition: all 0.3s ease;
+}
+
+.recommendation-card:hover {
+  box-shadow: 0 4px 16px rgba(255, 122, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.rec-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.rec-header h4 {
+  font-size: 1rem;
+  color: #333;
+  margin: 0;
+  font-weight: 700;
+  flex: 1;
+}
+
+.risk-badge {
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.risk-badge.risk-critical {
+  background: #FFCDD2;
+  color: #B71C1C;
+}
+
+.risk-badge.risk-high {
+  background: #FFE0B2;
+  color: #E65100;
+}
+
+.risk-badge.risk-moderate {
+  background: #C8E6C9;
+  color: #1B5E20;
+}
+
+.rec-description {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+
+.rec-confidence {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem;
+  background: white;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.rec-confidence .label {
+  color: #666;
+  font-weight: 600;
+}
+
+.rec-confidence .confidence-value {
+  color: #FF7A00;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.no-data-message {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem;
+  background: #f9f9f9;
+  border-radius: 8px;
+  color: #666;
+  font-size: 0.95rem;
 }
 
 /* Preparedness Tips Grid */

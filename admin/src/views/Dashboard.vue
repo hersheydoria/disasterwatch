@@ -8,12 +8,12 @@
       </header>
 
       <section class="stats-grid">
-        <div class="stat"> <div class="num">36</div> <div class="label">Total Shelters</div> </div>
-        <div class="stat green"> <div class="num">28</div> <div class="label">Active Shelters</div> </div>
-        <div class="stat red"> <div class="num">5</div> <div class="label">Full Capacity</div> </div>
-        <div class="stat"> <div class="num">3</div> <div class="label">Under Maintenance</div> </div>
-        <div class="stat orange"> <div class="num">2</div> <div class="label">Active Alerts</div> </div>
-        <div class="stat blue"> <div class="num">520</div> <div class="label">Total Evacuees</div> </div>
+        <div class="stat"> <div class="num">{{ stats.totalShelters }}</div> <div class="label">Total Shelters</div> </div>
+        <div class="stat green"> <div class="num">{{ stats.activeShelters }}</div> <div class="label">Active Shelters</div> </div>
+        <div class="stat red"> <div class="num">{{ stats.fullCapacityShelters }}</div> <div class="label">Full Capacity</div> </div>
+        <div class="stat"> <div class="num">{{ stats.maintenanceShelters }}</div> <div class="label">Under Maintenance</div> </div>
+        <div class="stat orange"> <div class="num">{{ stats.activeAlerts }}</div> <div class="label">Active Alerts</div> </div>
+        <div class="stat blue"> <div class="num">{{ stats.totalEvacuees }}</div> <div class="label">Total Evacuees</div> </div>
       </section>
 
       <section class="panels">
@@ -23,9 +23,11 @@
             <a class="view-all">View All</a>
           </div>
           <ul>
-            <li><strong>New shelter added:</strong> Barangay XYZ Hall <span class="time">2 hours ago</span></li>
-            <li><strong>Updated capacity:</strong> City Gym Shelter <span class="time">5 hours ago</span></li>
-            <li><strong>Earthquake alert issued</strong> in Agusan del Norte <span class="time">1 day ago</span></li>
+            <li v-for="(activity, idx) in recentActivities" :key="idx">
+              <strong>{{ activity.title }}:</strong> {{ activity.description }} 
+              <span class="time">{{ activity.time }}</span>
+            </li>
+            <li v-if="recentActivities.length === 0"><em>No recent activities</em></li>
           </ul>
         </div>
 
@@ -142,9 +144,64 @@
 </template>
 
 <script setup>
-import { inject } from 'vue'
+import { inject, reactive, onMounted } from 'vue'
+import { getShelters, getAlerts, getRecentEarthquakes } from '../api/client'
 
 const navigate = inject('navigate', () => {})
+
+const stats = reactive({
+  totalShelters: 0,
+  activeShelters: 0,
+  fullCapacityShelters: 0,
+  maintenanceShelters: 0,
+  activeAlerts: 0,
+  totalEvacuees: 0
+})
+
+const recentActivities = reactive([])
+const loading = reactive({ stats: true })
+
+onMounted(async () => {
+  try {
+    // Fetch shelters data
+    const sheltersResponse = await getShelters(1)
+    const shelters = sheltersResponse.results || sheltersResponse
+
+    stats.totalShelters = sheltersResponse.count || shelters.length
+    stats.activeShelters = shelters.filter(s => s.status === 'active').length
+    stats.fullCapacityShelters = shelters.filter(s => s.status === 'full').length
+    stats.maintenanceShelters = shelters.filter(s => s.status === 'maintenance').length
+    stats.totalEvacuees = shelters.reduce((sum, s) => sum + (s.current_occupancy || 0), 0)
+
+    // Fetch alerts data
+    const alertsResponse = await getAlerts(1)
+    const alerts = alertsResponse.results || alertsResponse
+    stats.activeAlerts = alerts.filter(a => a.status === 'active').length
+
+    // Build recent activities
+    recentActivities.length = 0
+    shelters.slice(0, 2).forEach(shelter => {
+      recentActivities.push({
+        title: 'Shelter Updated',
+        description: `${shelter.name}`,
+        time: '2 hours ago'
+      })
+    })
+
+    if (alerts.length > 0) {
+      recentActivities.push({
+        title: 'Active Alert',
+        description: `${alerts[0].description || 'Earthquake alert issued'}`,
+        time: '1 day ago'
+      })
+    }
+
+    loading.stats = false
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error)
+    loading.stats = false
+  }
+})
 
 function addNewShelter() {
   navigate('add-shelter')
@@ -159,12 +216,10 @@ function generateReport() {
 }
 
 function viewAlerts() {
-  // Alert functionality - can be expanded later
   navigate('alerts')
 }
 
 function viewAllLogs() {
-  // View logs functionality - can be expanded later
   console.log('View All Logs clicked')
 }
 </script>

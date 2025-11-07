@@ -24,19 +24,19 @@
     <!-- Stats Cards -->
     <section class="stats-grid">
       <div class="stat">
-        <div class="num">128</div>
+        <div class="num">{{ stats.total }}</div>
         <div class="label">Total Reports</div>
       </div>
       <div class="stat blue-label">
-        <div class="num">32</div>
+        <div class="num">{{ stats.newEntries }}</div>
         <div class="label">New Entries</div>
       </div>
       <div class="stat orange-label">
-        <div class="num">18</div>
+        <div class="num">{{ stats.updated }}</div>
         <div class="label">Updated Made</div>
       </div>
       <div class="stat red-label">
-        <div class="num">5</div>
+        <div class="num">{{ stats.active }}</div>
         <div class="label">Active Alerts</div>
       </div>
     </section>
@@ -68,50 +68,14 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td><strong>#RPT-2024-001</strong></td>
-            <td>Central Community Center</td>
-            <td><span class="badge active">Active</span></td>
-            <td>Facility needs updating with emergency inventory supplies</td>
-            <td>2024-01-15 11:15 AM</td>
-            <td>Sarah Johnson</td>
-            <td><a href="#" @click.prevent="viewReportDetails('#RPT-2024-001')" class="view-link">View Details</a></td>
-          </tr>
-          <tr>
-            <td><strong>#RPT-2024-002</strong></td>
-            <td>Barangay Emergency Hub</td>
-            <td><span class="badge updated">Updated</span></td>
-            <td>Capacity updated to 80 people (full maintenance)</td>
-            <td>2024-01-13 01:12 PM</td>
-            <td>Mike Chan</td>
-            <td><a href="#" @click.prevent="viewReportDetails('#RPT-2024-002')" class="view-link">View Details</a></td>
-          </tr>
-          <tr>
-            <td><strong>#RPT-2024-003</strong></td>
-            <td>Downtown Safe Haven</td>
-            <td><span class="badge alert">Alert</span></td>
-            <td>System failure, damage and infrastructure issues</td>
-            <td>2024-01-12 10:09 AM</td>
-            <td>Emily Rodriguez</td>
-            <td><a href="#" @click.prevent="viewReportDetails('#RPT-2024-003')" class="view-link">View Details</a></td>
-          </tr>
-          <tr>
-            <td><strong>#RPT-2024-004</strong></td>
-            <td>East Hi Valley Shelter</td>
-            <td><span class="badge active">Active</span></td>
-            <td>New temporary shelter setup for flood relief</td>
-            <td>2024-01-10 04:30 AM</td>
-            <td>David Park</td>
-            <td><a href="#" @click.prevent="viewReportDetails('#RPT-2024-004')" class="view-link">View Details</a></td>
-          </tr>
-          <tr>
-            <td><strong>#RPT-2024-005</strong></td>
-            <td>Eastside Community Hall</td>
-            <td><span class="badge updated">Updated</span></td>
-            <td>Supply inventory updated and supplies replenished</td>
-            <td>2024-01-14 14:31 PM</td>
-            <td>Lisa Wang</td>
-            <td><a href="#" @click.prevent="viewReportDetails('#RPT-2024-005')" class="view-link">View Details</a></td>
+          <tr v-for="report in filteredReports" :key="report.id">
+            <td><strong>#RPT-{{ String(report.id).padStart(4, '0') }}</strong></td>
+            <td>{{ report.shelter_name }}</td>
+            <td><span :class="['badge', report.status]">{{ report.status === 'active' ? 'Active' : report.status === 'updated' ? 'Updated' : 'Alert' }}</span></td>
+            <td>{{ report.description }}</td>
+            <td>{{ new Date(report.created_at).toLocaleString() }}</td>
+            <td>{{ report.created_by }}</td>
+            <td><a href="#" @click.prevent="viewReportDetails(report.id)" class="view-link">View Details</a></td>
           </tr>
         </tbody>
       </table>
@@ -142,95 +106,23 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Oct 18, 2024 11:30 AM</td>
+            <tr v-for="rec in recommendations" :key="rec.id">
+              <td>{{ new Date(rec.created_at).toLocaleString() }}</td>
               <td>
                 <div class="user-cell">
-                  <div class="user-avatar">SJ</div>
+                  <div class="user-avatar">{{ rec.user_name.substring(0, 2).toUpperCase() }}</div>
                   <div>
-                    <div class="user-name">Sarah Johnson</div>
-                    <div class="user-role">Downtown Ctr A</div>
+                    <div class="user-name">{{ rec.user_name }}</div>
+                    <div class="user-role">{{ rec.shelter_name }}</div>
                   </div>
                 </div>
               </td>
-              <td>Facility Capacity Planning</td>
-              <td>Central Community Center</td>
-              <td><span class="status-badge high">High Risk</span></td>
-              <td><span class="risk-high">High Risk</span></td>
-              <td><span class="outcome valid">VALID</span></td>
-              <td><button class="action-btn">⊙</button></td>
-            </tr>
-            <tr>
-              <td>Oct 18, 2024 11:45 PM</td>
-              <td>
-                <div class="user-cell">
-                  <div class="user-avatar">MR</div>
-                  <div>
-                    <div class="user-name">Mike Rodriguez</div>
-                    <div class="user-role">Barangay Ctr B</div>
-                  </div>
-                </div>
-              </td>
-              <td>Resource Allocation</td>
-              <td>Riverside Emergency Shelter</td>
-              <td><span class="status-badge medium">Medium Risk</span></td>
-              <td><span class="risk-medium">Medium Risk</span></td>
-              <td><span class="outcome valid">VALID</span></td>
-              <td><button class="action-btn">⊙</button></td>
-            </tr>
-            <tr>
-              <td>Oct 18, 2024 01:45 AM</td>
-              <td>
-                <div class="user-cell">
-                  <div class="user-avatar">EC</div>
-                  <div>
-                    <div class="user-name">Emily Chen</div>
-                    <div class="user-role">North Safe H</div>
-                  </div>
-                </div>
-              </td>
-              <td>Distribution Optimization</td>
-              <td>North Safe House</td>
-              <td><span class="status-badge low">Low Risk</span></td>
-              <td><span class="risk-low">Low Risk</span></td>
-              <td><span class="outcome valid">VALID</span></td>
-              <td><button class="action-btn">⊙</button></td>
-            </tr>
-            <tr>
-              <td>Oct 18, 2024 03:45 PM</td>
-              <td>
-                <div class="user-cell">
-                  <div class="user-avatar">DW</div>
-                  <div>
-                    <div class="user-name">David Wilson</div>
-                    <div class="user-role">East End, Zone E</div>
-                  </div>
-                </div>
-              </td>
-              <td>Predictive Maintenance</td>
-              <td>East End Community Hub</td>
-              <td><span class="status-badge high">High Risk</span></td>
-              <td><span class="risk-high">High Risk</span></td>
-              <td><span class="outcome pending">Pending</span></td>
-              <td><button class="action-btn">⊙</button></td>
-            </tr>
-            <tr>
-              <td>Oct 18, 2024 04:45 PM</td>
-              <td>
-                <div class="user-cell">
-                  <div class="user-avatar">LT</div>
-                  <div>
-                    <div class="user-name">Lisa Thompson</div>
-                    <div class="user-role">Milton Valley, Zone E</div>
-                  </div>
-                </div>
-              </td>
-              <td>Emergency Protocols</td>
-              <td>Milton Valley Shelter</td>
-              <td><span class="status-badge medium">Medium Risk</span></td>
-              <td><span class="risk-medium">Medium Risk</span></td>
-              <td><span class="outcome valid">VALID</span></td>
-              <td><button class="action-btn">⊙</button></td>
+              <td>{{ rec.recommendation_type }}</td>
+              <td>{{ rec.shelter_name }}</td>
+              <td><span :class="['status-badge', getStatusBadgeClass(rec.status)]">{{ rec.status === 'high' ? 'High Risk' : rec.status === 'medium' ? 'Medium Risk' : 'Low Risk' }}</span></td>
+              <td><span :class="['risk-' + rec.risk_level.toLowerCase()]">{{ rec.risk_level }}</span></td>
+              <td><span :class="['outcome', getOutcomeClass(rec.outcome)]">{{ rec.outcome.toUpperCase() }}</span></td>
+              <td><button class="action-btn" @click="viewLogDetails(rec.id)">⊙</button></td>
             </tr>
           </tbody>
         </table>
@@ -251,20 +143,64 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { getReports, getAIRecommendations } from '../api/client'
 
+const reports = ref([])
+const recommendations = ref([])
 const currentPage = ref(1)
 const filterDate = ref('Last 7 days')
 const searchQuery = ref('')
+const loading = ref(false)
+
+const filteredReports = computed(() => {
+  let filtered = reports.value
+
+  if (searchQuery.value) {
+    filtered = filtered.filter(report => 
+      report.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      report.report_type.toLowerCase().includes(searchQuery.value.toLowerCase())
+    )
+  }
+
+  return filtered
+})
+
+const stats = computed(() => ({
+  total: reports.value.length,
+  newEntries: reports.value.filter(r => r.status === 'new').length,
+  updated: reports.value.filter(r => r.status === 'updated').length,
+  active: reports.value.filter(r => r.status === 'active').length
+}))
 
 function exportCSV() {
-  console.log('Exporting to CSV...')
-  // CSV export functionality - can be expanded later
+  if (filteredReports.value.length === 0) {
+    alert('No reports to export')
+    return
+  }
+
+  const headers = ['Report ID', 'Shelter Name', 'Type', 'Description', 'Date', 'Updated By']
+  const rows = filteredReports.value.map(r => [
+    `#RPT-${String(r.id).padStart(4, '0')}`,
+    r.shelter_name,
+    r.report_type,
+    r.description,
+    new Date(r.created_at).toLocaleString(),
+    r.created_by
+  ])
+
+  const csv = [headers, ...rows].map(row => row.join(',')).join('\n')
+  const blob = new Blob([csv], { type: 'text/csv' })
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `reports-${Date.now()}.csv`
+  a.click()
 }
 
 function exportPDF() {
-  console.log('Exporting to PDF...')
-  // PDF export functionality - can be expanded later
+  alert('PDF export functionality coming soon')
+  // Can be implemented with a library like jsPDF
 }
 
 function viewReportDetails(reportId) {
@@ -274,18 +210,81 @@ function viewReportDetails(reportId) {
 
 function handlePagination(page) {
   currentPage.value = page
-  console.log(`Navigating to page: ${page}`)
 }
 
 function exportLogs() {
-  console.log('Exporting logs...')
-  // Export logs functionality - can be expanded later
+  if (recommendations.value.length === 0) {
+    alert('No logs to export')
+    return
+  }
+
+  const headers = ['Timestamp', 'User', 'Recommendation', 'Shelter', 'Status', 'Risk Level', 'Outcome']
+  const rows = recommendations.value.map(r => [
+    new Date(r.created_at).toLocaleString(),
+    r.user_name,
+    r.recommendation_type,
+    r.shelter_name,
+    r.status,
+    r.risk_level,
+    r.outcome
+  ])
+
+  const csv = [headers, ...rows].map(row => row.join(',')).join('\n')
+  const blob = new Blob([csv], { type: 'text/csv' })
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `recommendations-${Date.now()}.csv`
+  a.click()
 }
 
 function viewLogDetails(logId) {
   console.log(`Viewing details for log: ${logId}`)
-  // Log details functionality - can be expanded later
 }
+
+async function loadReports() {
+  loading.value = true
+  try {
+    const response = await getReports(1)
+    reports.value = Array.isArray(response) ? response : response.results || []
+  } catch (error) {
+    console.error('Error loading reports:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+async function loadRecommendations() {
+  try {
+    const response = await getAIRecommendations(1)
+    recommendations.value = Array.isArray(response) ? response : response.results || []
+  } catch (error) {
+    console.error('Error loading recommendations:', error)
+  }
+}
+
+function getRiskClass(riskLevel) {
+  if (riskLevel === 'high') return 'risk-high'
+  if (riskLevel === 'medium') return 'risk-medium'
+  return 'risk-low'
+}
+
+function getStatusBadgeClass(status) {
+  if (status === 'high') return 'high'
+  if (status === 'medium') return 'medium'
+  return 'low'
+}
+
+function getOutcomeClass(outcome) {
+  if (outcome === 'valid') return 'valid'
+  if (outcome === 'pending') return 'pending'
+  return 'invalid'
+}
+
+onMounted(async () => {
+  await loadReports()
+  await loadRecommendations()
+})
 </script>
 
 <style scoped>
