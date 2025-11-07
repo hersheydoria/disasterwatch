@@ -1,5 +1,13 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import * as L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+delete L.Icon.Default.prototype._getIconUrl
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png'
+})
 
 // Map state
 const selectedPin = ref(null)
@@ -8,6 +16,19 @@ const activeFilters = ref({
   shelters: true,
   hospitals: true
 })
+
+// Map configuration
+const mapCenter = ref([8.8, 125.5]) // Center of Caraga Region
+const mapZoom = ref(9)
+const mapOptions = ref({
+  zoomControl: false,
+  attributionControl: true
+})
+
+// Map instance
+const mapContainer = ref(null)
+let map = null
+const markers = ref([])
 
 // Define emits for navigation
 const emit = defineEmits(['navigate'])
@@ -182,6 +203,39 @@ const getZoneColor = (riskLevel) => {
   return colors[riskLevel] || '#999'
 }
 
+const getZoneIcon = (riskLevel) => {
+  const color = getZoneColor(riskLevel)
+  const svg = `
+    <svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="15" cy="15" r="12" fill="${color}" stroke="white" stroke-width="3"/>
+    </svg>
+  `
+  return `data:image/svg+xml;base64,${btoa(svg)}`
+}
+
+const getShelterIcon = () => {
+  const svg = `
+    <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <rect x="5" y="5" width="30" height="30" rx="4" ry="4" fill="white" stroke="#FF7A00" stroke-width="3"/>
+      <path d="M12 15l8-8 8 8v12a2 2 0 0 1-2 2H14a2 2 0 0 1-2-2z" fill="#FF7A00"/>
+      <polyline points="18,27 18,17 22,17 22,27" stroke="white" stroke-width="2" fill="none"/>
+    </svg>
+  `
+  return `data:image/svg+xml;base64,${btoa(svg)}`
+}
+
+const getHospitalIcon = () => {
+  const svg = `
+    <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <rect x="5" y="5" width="30" height="30" rx="4" ry="4" fill="white" stroke="#00AA00" stroke-width="3"/>
+      <rect x="11" y="11" width="18" height="18" rx="2" fill="#00AA00"/>
+      <rect x="17" y="17" width="6" height="6" fill="white"/>
+      <rect x="20" y="14" width="2" height="12" fill="white"/>
+    </svg>
+  `
+  return `data:image/svg+xml;base64,${btoa(svg)}`
+}
+
 const toggleFilter = (filter) => {
   activeFilters.value[filter] = !activeFilters.value[filter]
 }
@@ -207,6 +261,120 @@ const getMapStyle = (item) => {
 const getCapacityPercent = (current, capacity) => {
   return Math.round((current / capacity) * 100)
 }
+
+// Initialize map when component mounts
+onMounted(() => {
+  if (mapContainer.value) {
+    map = L.map(mapContainer.value).setView(mapCenter.value, mapZoom.value)
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map)
+    
+    updateMarkers()
+  }
+})
+
+// Clean up map when component unmounts
+onUnmounted(() => {
+  if (map) {
+    map.remove()
+    map = null
+  }
+})
+
+// Update markers when filters change
+const updateMarkers = () => {
+  if (!map) return
+  
+  // Clear existing markers
+  markers.value.forEach(marker => map.removeLayer(marker))
+  markers.value = []
+  
+  // Add zone markers
+  filteredZones.value.forEach(zone => {
+    const marker = L.circleMarker([zone.lat, zone.lng], {
+      color: getZoneColor(zone.riskLevel),
+      fillColor: getZoneColor(zone.riskLevel),
+      fillOpacity: 0.8,
+      radius: 15
+    }).addTo(map)
+    
+    marker.bindPopup(`
+      <div class="popup-content">
+        <h4>${zone.name}</h4>
+        <p><strong>Risk Level:</strong> ${zone.riskLevel.toUpperCase()}</p>
+        <p><strong>Magnitude:</strong> ${zone.magnitude}</p>
+        <p><strong>Activity:</strong> ${zone.frequency}</p>
+      </div>
+    `)
+    
+    marker.on('click', () => selectPin({ ...zone, type: 'zone' }))
+    markers.value.push(marker)
+  })
+  
+// Add shelter markers
+filteredShelters.value.forEach(shelter => {
+  const shelterIcon = L.divIcon({
+    html: `<div style="background: white; border: 3px solid #FF7A00; border-radius: 6px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#FF7A00" stroke-width="2" style="width: 20px; height: 20px;">
+        <path d="M3 12l9-9 9 9v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9,22 9,12 15,12 15,22"/>
+      </svg>
+    </div>`,
+    className: 'custom-shelter-icon',
+    iconSize: [40, 40],
+    iconAnchor: [20, 40]
+  })
+  
+  const marker = L.marker([shelter.lat, shelter.lng], { icon: shelterIcon }).addTo(map)
+  marker.bindPopup(`
+      <div class="popup-content">
+        <h4>${shelter.name}</h4>
+        <p><strong>Type:</strong> Evacuation Shelter</p>
+        <p><strong>Capacity:</strong> ${shelter.capacity}</p>
+        <p><strong>Current:</strong> ${shelter.current}</p>
+        <p><strong>Contact:</strong> ${shelter.contact}</p>
+      </div>
+    `)
+    
+    marker.on('click', () => selectPin(shelter))
+    markers.value.push(marker)
+  })
+  
+// Add hospital markers
+filteredHospitals.value.forEach(hospital => {
+  const hospitalIcon = L.divIcon({
+    html: `<div style="background: white; border: 3px solid #00AA00; border-radius: 6px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#00AA00" stroke-width="2" style="width: 20px; height: 20px;">
+        <rect x="3" y="6" width="18" height="12" rx="2"/>
+        <path d="M9 12h6"/>
+        <path d="M12 9v6"/>
+      </svg>
+    </div>`,
+    className: 'custom-hospital-icon',
+    iconSize: [40, 40],
+    iconAnchor: [20, 40]
+  })
+  
+  const marker = L.marker([hospital.lat, hospital.lng], { icon: hospitalIcon }).addTo(map)
+  marker.bindPopup(`
+      <div class="popup-content">
+        <h4>${hospital.name}</h4>
+        <p><strong>Type:</strong> Medical Facility</p>
+        <p><strong>Beds:</strong> ${hospital.beds}</p>
+        <p><strong>Status:</strong> ${hospital.emergency ? 'Operational' : 'Closed'}</p>
+        <p><strong>Contact:</strong> ${hospital.contact}</p>
+      </div>
+    `)
+    
+    marker.on('click', () => selectPin(hospital))
+    markers.value.push(marker)
+  })
+}
+
+// Watch for filter changes and update markers
+watch([filteredZones, filteredShelters, filteredHospitals], updateMarkers)
 </script>
 
 <template>
@@ -227,8 +395,23 @@ const getCapacityPercent = (current, capacity) => {
             <span class="risk-label">{{ currentRiskLevel }} RISK</span>
           </div>
           <div class="risk-meta">
-            <p>⚠️ Moderate Risk Level</p>
-            <p>👥 Population: 2.8M</p>
+            <p>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline-icon">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              Moderate Risk Level
+            </p>
+            <p>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline-icon">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              Population: 2.8M
+            </p>
           </div>
         </div>
 
@@ -240,25 +423,45 @@ const getCapacityPercent = (current, capacity) => {
               :class="['filter-btn', { active: activeFilters.earthquakeZones }]"
               @click="toggleFilter('earthquakeZones')"
             >
-              📍 Risk Zones
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="filter-icon">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              Risk Zones
             </button>
             <button
               :class="['filter-btn', { active: activeFilters.shelters }]"
               @click="toggleFilter('shelters')"
             >
-              🏢 Evacuation Shelters
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="filter-icon">
+                <path d="M3 12l9-9 9 9v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9,22 9,12 15,12 15,22"/>
+              </svg>
+              Evacuation Shelters
             </button>
             <button
               :class="['filter-btn', { active: activeFilters.hospitals }]"
               @click="toggleFilter('hospitals')"
             >
-              🏥 Hospitals
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="filter-icon">
+                <rect x="3" y="6" width="18" height="12" rx="2"/>
+                <path d="M9 12h6"/>
+                <path d="M12 9v6"/>
+              </svg>
+              Hospitals
             </button>
             <button
               :class="['filter-btn', { active: activeFilters.earthquakeZones }]"
               disabled
             >
-              📰 Recent Earthquakes
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="filter-icon">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10,9 9,9 8,9"/>
+              </svg>
+              Recent Earthquakes
             </button>
           </div>
         </div>
@@ -280,11 +483,22 @@ const getCapacityPercent = (current, capacity) => {
               <span>Low Risk Zone</span>
             </div>
             <div class="legend-item">
-              <div class="legend-icon">🏢</div>
+              <div class="legend-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 12l9-9 9 9v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                  <polyline points="9,22 9,12 15,12 15,22"/>
+                </svg>
+              </div>
               <span>Evacuation Shelter</span>
             </div>
             <div class="legend-item">
-              <div class="legend-icon">🏥</div>
+              <div class="legend-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="6" width="18" height="12" rx="2"/>
+                  <path d="M9 12h6"/>
+                  <path d="M12 9v6"/>
+                </svg>
+              </div>
               <span>Hospital</span>
             </div>
           </div>
@@ -319,75 +533,49 @@ const getCapacityPercent = (current, capacity) => {
         <!-- Map Header Bar -->
         <div class="map-header">
           <div class="header-left">
-            <span class="last-updated">🔴 Last Updated: 7 minutes ago</span>
-            <span class="system-status">✅ System Active</span>
+            <span class="last-updated">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="status-icon">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="2"/>
+              </svg>
+              Last Updated: 7 minutes ago
+            </span>
+            <span class="system-status">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="status-icon">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              System Active
+            </span>
           </div>
           <div class="header-right">
             <button class="action-btn secondary-btn" @click="emit('navigate', 'home')">← Back</button>
-            <button class="action-btn primary-btn" @click="emit('navigate', 'safety')">🔍 View Safety Recommendation</button>
+            <button class="action-btn primary-btn" @click="emit('navigate', 'safety')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="action-icon">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+              </svg>
+              View Safety Recommendation
+            </button>
           </div>
         </div>
 
         <!-- Map Canvas -->
-        <div class="map-canvas">
-          <!-- Earthquake Risk Zones -->
-          <div
-            v-for="zone in filteredZones"
-            :key="zone.id"
-            class="map-pin zone-pin"
-            :style="{
-              left: `${((zone.lng - 125.4) / 0.5) * 80 + 10}%`,
-              top: `${((9.5 - zone.lat) / 0.6) * 90 + 5}%`,
-              backgroundColor: getZoneColor(zone.riskLevel),
-              boxShadow: `0 0 ${zone.riskLevel === 'high' ? 15 : 10}px ${getZoneColor(zone.riskLevel)}`
-            }"
-            @click="selectPin({ ...zone, type: 'zone' })"
-            :title="zone.name"
-          ></div>
-
-          <!-- Evacuation Shelters -->
-          <div
-            v-for="shelter in filteredShelters"
-            :key="shelter.id"
-            class="map-pin shelter-pin"
-            :style="{
-              left: `${((shelter.lng - 125.4) / 0.5) * 80 + 10}%`,
-              top: `${((9.5 - shelter.lat) / 0.6) * 90 + 5}%`
-            }"
-            @click="selectPin(shelter)"
-            title="Evacuation Shelter"
-          >
-            🏢
-          </div>
-
-          <!-- Hospitals -->
-          <div
-            v-for="hospital in filteredHospitals"
-            :key="hospital.id"
-            class="map-pin hospital-pin"
-            :style="{
-              left: `${((hospital.lng - 125.4) / 0.5) * 80 + 10}%`,
-              top: `${((9.5 - hospital.lat) / 0.6) * 90 + 5}%`
-            }"
-            @click="selectPin(hospital)"
-            title="Hospital"
-          >
-            🏥
-          </div>
-
-          <!-- Map Background Grid -->
-          <div class="map-grid"></div>
-
+        <div ref="mapContainer" class="map-canvas">
           <!-- Zoom Controls -->
           <div class="zoom-controls">
-            <button class="zoom-btn">+</button>
-            <button class="zoom-btn">−</button>
+            <button class="zoom-btn" @click="mapZoom++">+</button>
+            <button class="zoom-btn" @click="mapZoom--">-</button>
           </div>
         </div>
 
         <!-- Info Panel - Floating on Map -->
         <div v-if="selectedPin" class="info-panel">
-          <button class="close-btn" @click="closeInfo">✕</button>
+          <button class="close-btn" @click="closeInfo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
 
           <div v-if="selectedPin.type === 'zone'" class="zone-info">
             <h2 class="info-title">{{ selectedPin.name }}</h2>
@@ -458,7 +646,11 @@ const getCapacityPercent = (current, capacity) => {
               <div class="detail-row">
                 <span class="detail-label">Status:</span>
                 <span class="detail-value" :style="{ color: selectedPin.emergency ? '#00AA00' : '#666' }">
-                  {{ selectedPin.emergency ? '🟢 OPERATIONAL' : 'CLOSED' }}
+                  <svg v-if="selectedPin.emergency" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="status-icon">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="2"/>
+                  </svg>
+                  {{ selectedPin.emergency ? 'OPERATIONAL' : 'CLOSED' }}
                 </span>
               </div>
               <div class="detail-row">
@@ -550,6 +742,15 @@ const getCapacityPercent = (current, capacity) => {
   margin: 0;
   font-size: 0.9rem;
   color: #666;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inline-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
 }
 
 /* Filters Section */
@@ -585,6 +786,15 @@ const getCapacityPercent = (current, capacity) => {
   color: #666;
   transition: all 0.3s ease;
   text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
 }
 
 .filter-btn:hover:not(:disabled) {
@@ -644,9 +854,17 @@ const getCapacityPercent = (current, capacity) => {
 }
 
 .legend-icon {
-  font-size: 1.2rem;
   width: 20px;
-  text-align: center;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.legend-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 /* Quick Stats */
@@ -719,11 +937,23 @@ const getCapacityPercent = (current, capacity) => {
 .last-updated {
   color: #FF7A00;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .system-status {
   color: #44AA44;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.status-icon {
+  width: 0.8rem;
+  height: 0.8rem;
+  flex-shrink: 0;
 }
 
 .header-right {
@@ -739,6 +969,15 @@ const getCapacityPercent = (current, capacity) => {
   font-weight: 600;
   font-size: 0.9rem;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.action-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
 }
 
 .secondary-btn {
@@ -766,71 +1005,48 @@ const getCapacityPercent = (current, capacity) => {
   overflow: hidden;
 }
 
-.map-grid {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
+.map-canvas :deep(.leaflet-container) {
   height: 100%;
-  background-image: 
-    linear-gradient(0deg, transparent 24%, rgba(200, 200, 200, 0.05) 25%, rgba(200, 200, 200, 0.05) 26%, transparent 27%, transparent 74%, rgba(200, 200, 200, 0.05) 75%, rgba(200, 200, 200, 0.05) 76%, transparent 77%, transparent),
-    linear-gradient(90deg, transparent 24%, rgba(200, 200, 200, 0.05) 25%, rgba(200, 200, 200, 0.05) 26%, transparent 27%, transparent 74%, rgba(200, 200, 200, 0.05) 75%, rgba(200, 200, 200, 0.05) 76%, transparent 77%, transparent);
-  background-size: 50px 50px;
-  pointer-events: none;
+  width: 100%;
+  z-index: 1;
 }
 
-/* Map Pins */
-.map-pin {
-  position: absolute;
+.map-canvas :deep(.leaflet-popup-content-wrapper) {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.map-canvas :deep(.custom-shelter-icon),
+.map-canvas :deep(.custom-hospital-icon) {
+  background: none !important;
+  border: none !important;
+}
+
+.map-canvas :deep(.custom-shelter-icon div),
+.map-canvas :deep(.custom-hospital-icon div) {
   cursor: pointer;
-  transform: translate(-50%, -50%);
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
+  transition: transform 0.2s ease;
 }
 
-.zone-pin {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 3px solid white;
+.map-canvas :deep(.custom-shelter-icon div:hover),
+.map-canvas :deep(.custom-hospital-icon div:hover) {
+  transform: scale(1.1);
 }
 
-.zone-pin:hover {
-  transform: translate(-50%, -50%) scale(1.3);
-  z-index: 20;
+.popup-content {
+  padding: 0.5rem;
 }
 
-.shelter-pin {
-  width: 40px;
-  height: 40px;
-  background: white;
-  border: 3px solid #FF7A00;
-  border-radius: 6px;
-  font-size: 1.5rem;
+.popup-content h4 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 1rem;
 }
 
-.shelter-pin:hover {
-  transform: translate(-50%, -50%) scale(1.2);
-  box-shadow: 0 0 20px rgba(255, 122, 0, 0.5);
-  z-index: 20;
-}
-
-.hospital-pin {
-  width: 40px;
-  height: 40px;
-  background: white;
-  border: 3px solid #00AA00;
-  border-radius: 6px;
-  font-size: 1.5rem;
-}
-
-.hospital-pin:hover {
-  transform: translate(-50%, -50%) scale(1.2);
-  box-shadow: 0 0 20px rgba(0, 170, 0, 0.5);
-  z-index: 20;
+.popup-content p {
+  margin: 0.25rem 0;
+  font-size: 0.85rem;
+  color: #666;
 }
 
 /* Zoom Controls */
@@ -842,7 +1058,7 @@ const getCapacityPercent = (current, capacity) => {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  z-index: 15;
+  z-index: 1000;
 }
 
 .zoom-btn {
@@ -900,6 +1116,11 @@ const getCapacityPercent = (current, capacity) => {
 
 .close-btn:hover {
   background: #E56A00;
+}
+
+.close-btn svg {
+  width: 16px;
+  height: 16px;
 }
 
 .zone-info,
@@ -982,6 +1203,12 @@ const getCapacityPercent = (current, capacity) => {
 .capacity-fill {
   height: 100%;
   background: linear-gradient(90deg, #FF9933, #FF7A00);
+}
+
+.status-icon {
+  width: 0.8rem;
+  height: 0.8rem;
+  margin-right: 0.3rem;
 }
 
 /* Responsive Design */

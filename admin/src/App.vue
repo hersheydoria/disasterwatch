@@ -15,6 +15,7 @@ import Dashboard from './views/Dashboard.vue'
 import Shelters from './views/Shelters.vue'
 import AddShelter from './views/AddShelter.vue'
 import Reports from './views/Reports.vue'
+import Alerts from './views/Alerts.vue'
 import Settings from './views/Settings.vue'
 
 const loggedIn = ref(false)
@@ -55,6 +56,7 @@ const currentView = computed(()=>{
   if(route.value === 'add-shelter') return AddShelter
   if(route.value === 'shelters') return Shelters
   if(route.value === 'reports') return Reports
+  if(route.value === 'alerts') return Alerts
   if(route.value === 'settings') return Settings
   if(route.value === 'dashboard') return Dashboard
   // fallback to dashboard for other routes until implemented

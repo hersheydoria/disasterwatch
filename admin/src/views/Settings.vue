@@ -85,7 +85,10 @@
           <div class="notification-card">
             <div class="notification-card-header">
               <div class="notification-title">
-                <span class="icon email-icon">📧</span>
+                <svg class="icon email-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="4" width="20" height="16" rx="2"/>
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                </svg>
                 <h4>Email Notifications</h4>
               </div>
               <label class="toggle-switch">
@@ -100,7 +103,9 @@
           <div class="notification-card">
             <div class="notification-card-header">
               <div class="notification-title">
-                <span class="icon sms-icon">💬</span>
+                <svg class="icon sms-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
                 <h4>SMS Notifications</h4>
               </div>
               <label class="toggle-switch">
@@ -115,7 +120,10 @@
           <div class="notification-card">
             <div class="notification-card-header">
               <div class="notification-title">
-                <span class="icon push-icon">🔔</span>
+                <svg class="icon push-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
                 <h4>Push Notifications</h4>
               </div>
               <label class="toggle-switch">
@@ -130,7 +138,10 @@
           <div class="notification-card">
             <div class="notification-card-header">
               <div class="notification-title">
-                <span class="icon frequency-icon">⏱️</span>
+                <svg class="icon frequency-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="9"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
                 <h4>Notification Frequency</h4>
               </div>
             </div>
@@ -170,7 +181,10 @@
           <div class="config-column">
             <div class="config-block">
               <div class="block-header">
-                <span class="block-icon">⚙️</span>
+                <svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 0l4.24-4.24M1 12h6m6 0h6m-15.78 7.78l4.24-4.24m5.08 0l4.24 4.24"/>
+                </svg>
                 <div>
                   <h4>General Settings</h4>
                   <p class="block-desc">Basic system configuration</p>
@@ -203,7 +217,11 @@
             <!-- Data Backup Section -->
             <div class="config-block backup-block">
               <div class="block-header">
-                <span class="block-icon">💾</span>
+                <svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                  <polyline points="17 21 17 13 7 13 7 21"/>
+                  <polyline points="7 3 7 8 15 8"/>
+                </svg>
                 <div>
                   <h4>Data Backup</h4>
                   <p class="block-desc">Backup and restore system data</p>
@@ -221,7 +239,9 @@
             <!-- System Status -->
             <div class="config-block status-block">
               <div class="block-header">
-                <span class="block-icon">✅</span>
+                <svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
                 <div>
                   <h4>System Status</h4>
                   <p class="block-desc">Current system health and performance</p>
@@ -250,7 +270,11 @@
           <div class="config-column">
             <div class="config-block map-config-block">
               <div class="block-header">
-                <span class="block-icon">🗺️</span>
+                <svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+                  <line x1="9" y1="3" x2="9" y2="18"/>
+                  <line x1="15" y1="6" x2="15" y2="21"/>
+                </svg>
                 <div>
                   <h4>Map Configuration</h4>
                   <p class="block-desc">Map display and API settings</p>
@@ -288,7 +312,10 @@
           <!-- Change Password Section -->
           <div class="security-block">
             <div class="security-block-header">
-              <span class="security-icon">🔐</span>
+              <svg class="security-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
               <h3>Change Password</h3>
             </div>
 
@@ -296,7 +323,12 @@
               <label>Current Password</label>
               <div class="password-input-wrapper">
                 <input type="password" placeholder="Enter your password" />
-                <button class="toggle-password-btn">👁️</button>
+                <button class="toggle-password-btn" type="button">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
               </div>
             </div>
 
@@ -304,7 +336,12 @@
               <label>New Password</label>
               <div class="password-input-wrapper">
                 <input type="password" placeholder="Enter new password" />
-                <button class="toggle-password-btn">👁️</button>
+                <button class="toggle-password-btn" type="button">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
               </div>
             </div>
 
@@ -312,7 +349,12 @@
               <label>Confirm New Password</label>
               <div class="password-input-wrapper">
                 <input type="password" placeholder="Confirm new password" />
-                <button class="toggle-password-btn">👁️</button>
+                <button class="toggle-password-btn" type="button">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
               </div>
             </div>
 
@@ -322,7 +364,10 @@
           <!-- Login Activity Section -->
           <div class="security-block">
             <div class="security-block-header">
-              <span class="security-icon">📱</span>
+              <svg class="security-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                <line x1="12" y1="18" x2="12.01" y2="18"/>
+              </svg>
               <h3>Login Activity</h3>
               <span class="activity-filter">Last 30 days</span>
             </div>
@@ -344,7 +389,12 @@
                   <td>192.168.1.105</td>
                   <td>
                     <div class="device-info">
-                      <span class="device-icon">💻</span> Chrome on Windows
+                      <svg class="device-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                        <line x1="8" y1="21" x2="16" y2="21"/>
+                        <line x1="12" y1="17" x2="12" y2="21"/>
+                      </svg>
+                      Chrome on Windows
                     </div>
                   </td>
                   <td><span class="status-badge current">Current Session</span></td>
@@ -355,7 +405,11 @@
                   <td>192.168.1.105</td>
                   <td>
                     <div class="device-info">
-                      <span class="device-icon">📱</span> Safari on iPhone
+                      <svg class="device-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                        <line x1="12" y1="18" x2="12.01" y2="18"/>
+                      </svg>
+                      Safari on iPhone
                     </div>
                   </td>
                   <td><span class="status-badge">Signed Out</span></td>
@@ -366,7 +420,11 @@
                   <td>203.0.113.45</td>
                   <td>
                     <div class="device-info">
-                      <span class="device-icon">📱</span> Firefox on macOS
+                      <svg class="device-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                        <line x1="12" y1="18" x2="12.01" y2="18"/>
+                      </svg>
+                      Firefox on macOS
                     </div>
                   </td>
                   <td><span class="status-badge">Signed Out</span></td>
@@ -377,7 +435,11 @@
                   <td>192.168.1.105</td>
                   <td>
                     <div class="device-info">
-                      <span class="device-icon">📱</span> Chrome on Android
+                      <svg class="device-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                        <line x1="12" y1="18" x2="12.01" y2="18"/>
+                      </svg>
+                      Chrome on Android
                     </div>
                   </td>
                   <td><span class="status-badge">Signed Out</span></td>
@@ -386,7 +448,14 @@
             </table>
 
             <div class="activity-warning">
-              <strong>⚠️ Sign Out of All Devices</strong>
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <svg style="width: 20px; height: 20px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3.05h16.94a2 2 0 0 0 1.71-3.05L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <strong>Sign Out of All Devices</strong>
+              </div>
               <p>This will sign you out of all sessions. Review the current one. You'll need to sign in again in other devices.</p>
               <button class="btn-sign-out-all">Sign Out of All Devices</button>
             </div>
@@ -674,6 +743,15 @@ const notificationSettings = reactive({
   justify-content: center;
 }
 
+.icon.email-icon,
+.icon.sms-icon,
+.icon.push-icon,
+.icon.frequency-icon {
+  width: 24px;
+  height: 24px;
+  color: #ff6b1a;
+}
+
 .notification-card-desc {
   font-size: 13px;
   color: #666;
@@ -862,6 +940,9 @@ const notificationSettings = reactive({
 .block-icon {
   font-size: 28px;
   flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  color: #ff6b1a;
 }
 
 .block-header h4 {
@@ -1071,6 +1152,9 @@ const notificationSettings = reactive({
 
 .security-icon {
   font-size: 24px;
+  width: 24px;
+  height: 24px;
+  color: #ff6b1a;
 }
 
 .security-block-header h3 {
@@ -1119,6 +1203,18 @@ const notificationSettings = reactive({
   font-size: 16px;
   opacity: 0.6;
   transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: #666;
+}
+
+.toggle-password-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
 }
 
 .toggle-password-btn:hover {
@@ -1181,6 +1277,12 @@ const notificationSettings = reactive({
 
 .device-icon {
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  color: #666;
 }
 
 .status-badge {

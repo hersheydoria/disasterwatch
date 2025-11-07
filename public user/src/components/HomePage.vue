@@ -12,7 +12,12 @@
           </p>
           <div class="cta-buttons">
             <button class="btn btn-primary" @click="$emit('navigate', 'map')">
-              🗺️ View Live Map
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+                <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+                <line x1="8" y1="2" x2="8" y2="18"/>
+                <line x1="16" y1="6" x2="16" y2="22"/>
+              </svg>
+              View Live Map
             </button>
           </div>
           <div class="stats">
@@ -350,6 +355,15 @@ defineEmits(['navigate'])
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  flex-shrink: 0;
 }
 
 .btn-primary {

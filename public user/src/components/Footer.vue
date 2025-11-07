@@ -45,7 +45,6 @@ defineEmits(['navigate'])
           <div class="social-links">
             <a href="#" title="Facebook">f</a>
             <a href="#" title="Twitter">𝕏</a>
-            <a href="#" title="Instagram">📷</a>
           </div>
         </div>
       </div>

@@ -7,17 +7,17 @@
     <!-- Filter Bar -->
     <div class="filter-bar">
       <div class="search-box">
-        <input type="text" placeholder="Search by report name or report type..." />
+        <input v-model="searchQuery" type="text" placeholder="Search by report name or report type..." />
       </div>
       <div class="filter-controls">
-        <select>
+        <select v-model="filterDate">
           <option>Last 7 days</option>
           <option>Last 30 days</option>
           <option>Last 90 days</option>
           <option>This year</option>
         </select>
-        <button class="btn-green">Export CSV</button>
-        <button class="btn-blue">Export PDF</button>
+        <button class="btn-green" @click="exportCSV">Export CSV</button>
+        <button class="btn-blue" @click="exportPDF">Export PDF</button>
       </div>
     </div>
 
@@ -48,11 +48,9 @@
         <div class="table-info">
           <span class="showing-text">Showing 1 to 5 of 180 results</span>
           <div class="pagination">
-            <button>Previous</button>
-            <button class="active">1</button>
-            <button>2</button>
-            <button>3</button>
-            <button>Next</button>
+            <button @click="handlePagination(currentPage - 1)" :disabled="currentPage === 1">Previous</button>
+            <button v-for="n in 3" :key="n" @click="handlePagination(n)" :class="{ active: currentPage === n }">{{ n }}</button>
+            <button @click="handlePagination(currentPage + 1)">Next</button>
           </div>
         </div>
       </div>
@@ -77,7 +75,7 @@
             <td>Facility needs updating with emergency inventory supplies</td>
             <td>2024-01-15 11:15 AM</td>
             <td>Sarah Johnson</td>
-            <td><a href="#" class="view-link">View Details</a></td>
+            <td><a href="#" @click.prevent="viewReportDetails('#RPT-2024-001')" class="view-link">View Details</a></td>
           </tr>
           <tr>
             <td><strong>#RPT-2024-002</strong></td>
@@ -86,7 +84,7 @@
             <td>Capacity updated to 80 people (full maintenance)</td>
             <td>2024-01-13 01:12 PM</td>
             <td>Mike Chan</td>
-            <td><a href="#" class="view-link">View Details</a></td>
+            <td><a href="#" @click.prevent="viewReportDetails('#RPT-2024-002')" class="view-link">View Details</a></td>
           </tr>
           <tr>
             <td><strong>#RPT-2024-003</strong></td>
@@ -95,7 +93,7 @@
             <td>System failure, damage and infrastructure issues</td>
             <td>2024-01-12 10:09 AM</td>
             <td>Emily Rodriguez</td>
-            <td><a href="#" class="view-link">View Details</a></td>
+            <td><a href="#" @click.prevent="viewReportDetails('#RPT-2024-003')" class="view-link">View Details</a></td>
           </tr>
           <tr>
             <td><strong>#RPT-2024-004</strong></td>
@@ -104,7 +102,7 @@
             <td>New temporary shelter setup for flood relief</td>
             <td>2024-01-10 04:30 AM</td>
             <td>David Park</td>
-            <td><a href="#" class="view-link">View Details</a></td>
+            <td><a href="#" @click.prevent="viewReportDetails('#RPT-2024-004')" class="view-link">View Details</a></td>
           </tr>
           <tr>
             <td><strong>#RPT-2024-005</strong></td>
@@ -113,7 +111,7 @@
             <td>Supply inventory updated and supplies replenished</td>
             <td>2024-01-14 14:31 PM</td>
             <td>Lisa Wang</td>
-            <td><a href="#" class="view-link">View Details</a></td>
+            <td><a href="#" @click.prevent="viewReportDetails('#RPT-2024-005')" class="view-link">View Details</a></td>
           </tr>
         </tbody>
       </table>
@@ -126,7 +124,7 @@
           <h3>AI Recommendation Logs</h3>
           <p class="subtitle">Review logs of AI-generated suggestions by recommendation type</p>
         </div>
-        <button class="btn-export">Export</button>
+        <button class="btn-export" @click="exportLogs">Export</button>
       </div>
 
       <div class="logs-table-wrapper">
@@ -253,7 +251,41 @@
 </template>
 
 <script setup>
-// Reports page component
+import { ref } from 'vue'
+
+const currentPage = ref(1)
+const filterDate = ref('Last 7 days')
+const searchQuery = ref('')
+
+function exportCSV() {
+  console.log('Exporting to CSV...')
+  // CSV export functionality - can be expanded later
+}
+
+function exportPDF() {
+  console.log('Exporting to PDF...')
+  // PDF export functionality - can be expanded later
+}
+
+function viewReportDetails(reportId) {
+  console.log(`Viewing details for report: ${reportId}`)
+  // Report details modal - can be expanded later
+}
+
+function handlePagination(page) {
+  currentPage.value = page
+  console.log(`Navigating to page: ${page}`)
+}
+
+function exportLogs() {
+  console.log('Exporting logs...')
+  // Export logs functionality - can be expanded later
+}
+
+function viewLogDetails(logId) {
+  console.log(`Viewing details for log: ${logId}`)
+  // Log details functionality - can be expanded later
+}
 </script>
 
 <style scoped>

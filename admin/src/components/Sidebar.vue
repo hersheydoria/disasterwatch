@@ -8,6 +8,7 @@
     <nav class="nav">
         <a :class="{active: currentRoute==='dashboard'}" @click.prevent="navigate('dashboard')">Dashboard</a>
         <a :class="{active: currentRoute==='shelters'}" @click.prevent="navigate('shelters')">Shelters</a>
+        <a :class="{active: currentRoute==='alerts'}" @click.prevent="navigate('alerts')">Alerts</a>
         <a :class="{active: currentRoute==='reports'}" @click.prevent="navigate('reports')">Reports</a>
         <a :class="{active: currentRoute==='settings'}" @click.prevent="navigate('settings')">Settings</a>
       </nav>

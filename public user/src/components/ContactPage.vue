@@ -18,14 +18,24 @@
           <form @submit.prevent="submitContactForm" class="contact-form">
             <!-- Success Message -->
             <div v-if="formSubmitted" class="success-message">
-              <div class="success-icon">✓</div>
+              <div class="success-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
               <h3>Thank you!</h3>
               <p>Your message has been sent successfully. We'll be in touch soon.</p>
             </div>
 
             <!-- Error Message -->
             <div v-if="formError && !formSubmitted" class="error-message">
-              <span class="error-icon">⚠</span>
+              <span class="error-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              </span>
               {{ formError }}
             </div>
 
@@ -87,7 +97,12 @@
           <div class="contact-info-cards">
             <!-- Email -->
             <div class="info-card">
-              <div class="info-icon">✉️</div>
+              <div class="info-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+              </div>
               <h3>Email</h3>
               <p class="info-detail">info@disasterwatch.ph</p>
               <p class="info-subtext">Support during business hours</p>
@@ -95,7 +110,11 @@
 
             <!-- Phone -->
             <div class="info-card">
-              <div class="info-icon">📞</div>
+              <div class="info-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+              </div>
               <h3>Phone Number</h3>
               <p class="info-detail">+63-85-225-0000</p>
               <p class="info-subtext">Mon - Fri, 8:00 AM - 5:00 PM</p>
@@ -103,7 +122,12 @@
 
             <!-- Office -->
             <div class="info-card">
-              <div class="info-icon">📍</div>
+              <div class="info-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+              </div>
               <h3>Office Location</h3>
               <p class="info-detail">Butuan City, Caraga</p>
               <p class="info-subtext">Regional Office</p>
@@ -111,7 +135,12 @@
 
             <!-- Hours -->
             <div class="info-card">
-              <div class="info-icon">🕐</div>
+              <div class="info-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </div>
               <h3>Office Hours</h3>
               <p class="info-detail">Monday - Friday, 9 AM - 5 PM</p>
               <p class="info-subtext">Saturday - Sunday: Closed</p>
@@ -125,7 +154,13 @@
         <div class="map-container">
           <div class="map-placeholder">
             <img src="../assets/map.png" alt="Caraga Region Map" class="map-image" />
-            <button class="btn btn-map-link">📍 Subscribe to Caraga Region</button>
+            <button class="btn btn-map-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline-icon">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              Subscribe to Caraga Region
+            </button>
           </div>
         </div>
         <p class="map-description">DisasterWatch serves the entire Caraga Region, providing real-time monitoring and emergency resources to protect our communities.</p>
@@ -136,13 +171,29 @@
     <section class="emergency-section">
       <div class="emergency-content">
         <div class="emergency-header">
-          <span class="emergency-icon">⚠️</span>
+          <span class="emergency-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </span>
           <h2>Emergency Alert</h2>
         </div>
         <p>In case of immediate earthquake emergency, reach the local CDRRMO hotline immediately</p>
         <div class="emergency-buttons">
-          <button class="btn btn-emergency">☎️ Call 911</button>
-          <button class="btn btn-secondary">� Emergency Hotline</button>
+          <button class="btn btn-emergency">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline-icon">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+            Call 911
+          </button>
+          <button class="btn btn-secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline-icon">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+            Emergency Hotline
+          </button>
         </div>
       </div>
     </section>
@@ -323,9 +374,18 @@ const submitContactForm = () => {
 }
 
 .success-icon {
-  font-size: 2.5rem;
-  display: block;
-  margin-bottom: 0.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.5rem;
+  color: white;
+}
+
+.success-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .success-message h3 {
@@ -349,8 +409,15 @@ const submitContactForm = () => {
 }
 
 .error-icon {
-  font-size: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
   flex-shrink: 0;
+  color: white;
+}
+
+.error-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 /* Form Submit Button */
@@ -393,9 +460,18 @@ const submitContactForm = () => {
 }
 
 .info-icon {
-  font-size: 1.8rem;
+  width: 1.8rem;
+  height: 1.8rem;
   margin-bottom: 0.5rem;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FF7A00;
+}
+
+.info-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .info-card h3 {
@@ -503,7 +579,19 @@ const submitContactForm = () => {
 }
 
 .emergency-icon {
-  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.inline-icon {
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
 }
 
 .emergency-header h2 {
@@ -718,7 +806,8 @@ const submitContactForm = () => {
   }
 
   .info-icon {
-    font-size: 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
   }
 
   .info-card h3 {
