@@ -227,7 +227,42 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
+
 defineEmits(['navigate'])
+
+const teamMembers = ref([
+  { name: 'Maria Santos', role: 'Project Director', expertise: 'Disaster Management' },
+  { name: 'Juan Reyes', role: 'Lead Developer', expertise: 'Full Stack Development' },
+  { name: 'Ana Cruz', role: 'UX/UI Designer', expertise: 'User Experience' },
+  { name: 'Carlos Mendoza', role: 'Data Scientist', expertise: 'AI & Machine Learning' },
+  { name: 'Rosa Villanueva', role: 'Community Manager', expertise: 'Stakeholder Relations' },
+  { name: 'Miguel Torres', role: 'QA Engineer', expertise: 'Testing & Quality Assurance' }
+])
+
+const partners = ref([
+  { name: 'Caraga Regional Development Council', type: 'Government' },
+  { name: 'Philippine Red Cross', type: 'NGO' },
+  { name: 'PAGASA (Weather Bureau)', type: 'Government' },
+  { name: 'USGS Earthquake Hazards Program', type: 'International' },
+  { name: 'Local Government Units of Caraga', type: 'Government' },
+  { name: 'Community Disaster Risk Reduction Centers', type: 'Local' }
+])
+
+const achievements = ref([
+  { number: '500K+', label: 'Users Reached' },
+  { number: '150+', label: 'Shelters Tracked' },
+  { number: '24/7', label: 'Monitoring Active' },
+  { number: '5', label: 'Provinces Covered' },
+  { number: '99.8%', label: 'System Uptime' },
+  { number: '2M+', label: 'Lives Protected' }
+])
+
+const testimonials = ref([
+  { name: 'Barangay Captain Lito Reyes', quote: 'DisasterWatch has been crucial in helping our community prepare for earthquakes. The real-time information saves lives.' },
+  { name: 'Dr. Maria Fernandez, Hospital Director', quote: 'The earthquake monitoring and early warnings have allowed us to better prepare our medical staff and facilities.' },
+  { name: 'Community Volunteer Anna Rosa', quote: 'Easy to use and very informative. Everyone in our barangay now uses DisasterWatch for safety updates.' }
+])
 </script>
 
 <style scoped>

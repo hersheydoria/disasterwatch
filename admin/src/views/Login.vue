@@ -52,7 +52,6 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import logo from '../assets/logo.png'
-import { login } from '../api/client'
 
 const emit = defineEmits(['login'])
 
@@ -60,7 +59,7 @@ const form = reactive({ username: '', password: '', remember: false })
 const loading = ref(false)
 const error = ref('')
 
-async function submit() {
+function submit() {
   if (!form.username || !form.password) {
     error.value = 'Please enter username and password'
     return
@@ -69,25 +68,16 @@ async function submit() {
   loading.value = true
   error.value = ''
 
-  try {
-    const response = await login(form.username, form.password)
-    console.log('Login successful:', response)
-    
-    // Save user preference for remember me
-    if (form.remember) {
-      localStorage.setItem('rememberUsername', form.username)
-    } else {
-      localStorage.removeItem('rememberUsername')
-    }
-    
-    // Emit login event to trigger dashboard display
-    emit('login')
-  } catch (err) {
-    error.value = err.message || 'Login failed. Please try again.'
-    console.error('Login error:', err)
-  } finally {
-    loading.value = false
+  // Save user preference for remember me
+  if (form.remember) {
+    localStorage.setItem('rememberUsername', form.username)
+  } else {
+    localStorage.removeItem('rememberUsername')
   }
+  
+  // Emit login event to trigger dashboard display
+  emit('login')
+  loading.value = false
 }
 </script>
 

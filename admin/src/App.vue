@@ -1,16 +1,17 @@
 <template>
-  <Login v-if="!loggedIn" @login="onLogin" />
-
-  <div v-else class="app-wrap">
-    <Sidebar :currentRoute="route" @navigate="onNavigate" @logout="onLogout" />
-    <component :is="currentView" />
+  <div class="app-wrap">
+    <template v-if="loggedIn">
+      <Sidebar :currentRoute="route" @navigate="onNavigate" />
+      <component :is="currentView" />
+    </template>
+    <Login @login="onLogin" v-else />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, provide, onMounted } from 'vue'
-import Login from './views/Login.vue'
+import { ref, computed, provide } from 'vue'
 import Sidebar from './components/Sidebar.vue'
+import Login from './views/Login.vue'
 import Dashboard from './views/Dashboard.vue'
 import Shelters from './views/Shelters.vue'
 import AddShelter from './views/AddShelter.vue'
@@ -18,36 +19,23 @@ import Reports from './views/Reports.vue'
 import Alerts from './views/Alerts.vue'
 import Settings from './views/Settings.vue'
 
-const loggedIn = ref(false)
+const loggedIn = ref(localStorage.getItem('adminLoggedIn') === 'true')
 const route = ref('dashboard')
 
 function onLogin(){
   loggedIn.value = true
-  localStorage.setItem('loggedIn', 'true')
+  localStorage.setItem('adminLoggedIn', 'true')
 }
 
 function onNavigate(to){ 
-  route.value = to
-  localStorage.setItem('currentRoute', to)
-}
-
-function onLogout(){
-  loggedIn.value = false
-  localStorage.removeItem('loggedIn')
-  localStorage.removeItem('currentRoute')
-  route.value = 'dashboard'
-}
-
-// Restore login state and current route from localStorage on mount
-onMounted(()=>{
-  if(localStorage.getItem('loggedIn') === 'true'){
-    loggedIn.value = true
-    const savedRoute = localStorage.getItem('currentRoute')
-    if(savedRoute){
-      route.value = savedRoute
-    }
+  if(to === 'login'){
+    loggedIn.value = false
+    localStorage.removeItem('adminLoggedIn')
+    route.value = 'dashboard'
+  } else {
+    route.value = to
   }
-})
+}
 
 // Provide navigate function to child views
 provide('navigate', onNavigate)

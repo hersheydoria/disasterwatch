@@ -121,7 +121,30 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
+
 defineEmits(['navigate'])
+
+const recentEarthquakes = ref([
+  { id: 1, location: 'Butuan City', magnitude: 4.5, depth: 12, time: '2 hours ago', status: 'Safe' },
+  { id: 2, location: 'Surigao City', magnitude: 3.8, depth: 15, time: '5 hours ago', status: 'Safe' },
+  { id: 3, location: 'Tandag', magnitude: 5.2, depth: 18, time: '1 day ago', status: 'Monitored' }
+])
+
+const shelterStats = ref({
+  totalShelters: 150,
+  activeShelters: 142,
+  capacity: 25000,
+  occupied: 340
+})
+
+const regions = ref([
+  { name: 'Agusan del Norte', status: 'Safe', lastEQ: '3 hours ago' },
+  { name: 'Surigao del Sur', status: 'Watch', lastEQ: '1 hour ago' },
+  { name: 'Dinagat Islands', status: 'Safe', lastEQ: '6 hours ago' },
+  { name: 'Misamis Oriental', status: 'Safe', lastEQ: '12 hours ago' },
+  { name: 'Davao Oriental', status: 'Safe', lastEQ: '2 days ago' }
+])
 </script>
 
 <style scoped>

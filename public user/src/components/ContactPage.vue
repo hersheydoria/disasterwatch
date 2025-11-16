@@ -47,6 +47,7 @@
                   type="text"
                   class="form-input"
                   placeholder="Full Name"
+                  @input="onFullNameInput"
                   required
                 />
               </div>
@@ -56,6 +57,7 @@
                   type="email"
                   class="form-input"
                   placeholder="Email Address"
+                  @input="onEmailInput"
                   required
                 />
               </div>
@@ -67,6 +69,7 @@
                 type="text"
                 class="form-input"
                 placeholder="Subject"
+                @input="onSubjectInput"
                 required
               />
             </div>
@@ -77,6 +80,7 @@
                 class="form-textarea"
                 placeholder="Message"
                 rows="5"
+                @input="onMessageInput"
                 required
               ></textarea>
             </div>
@@ -215,6 +219,28 @@ const form = ref({
 const formSubmitted = ref(false)
 const formError = ref('')
 
+const offices = ref([
+  { name: 'Butuan Central Office', city: 'Butuan City', phone: '+63-85-225-0000', email: 'butuan@disasterwatch.ph', hours: '8 AM - 5 PM' },
+  { name: 'Surigao Branch', city: 'Surigao City', phone: '+63-86-235-1234', email: 'surigao@disasterwatch.ph', hours: '8 AM - 5 PM' },
+  { name: 'Tandag Field Office', city: 'Tandag, Surigao del Sur', phone: '+63-86-211-5678', email: 'tandag@disasterwatch.ph', hours: '8 AM - 5 PM' }
+])
+
+const emergencyContacts = ref([
+  { organization: 'National Emergency Hotline', phone: '911', available: '24/7' },
+  { organization: 'Philippine Red Cross', phone: '143', available: '24/7' },
+  { organization: 'PAGASA Weather Bureau', phone: '8-PAGASA (827-4272)', available: '24/7' },
+  { organization: 'Caraga CDRRMO', phone: '+63-85-227-0123', available: '24/7' },
+  { organization: 'Bureau of Fire Protection', phone: '143 (Fire) or 8-BFPHOTLINE', available: '24/7' }
+])
+
+const faqs = ref([
+  { question: 'How often is the earthquake data updated?', answer: 'Our system updates earthquake data every 5 minutes from official sources like PAGASA and USGS.' },
+  { question: 'Are the shelters list always accurate?', answer: 'We update shelter information regularly, but we recommend confirming with local authorities before evacuation.' },
+  { question: 'Can I use DisasterWatch offline?', answer: 'The web version requires internet. Check back soon for our offline-capable mobile app.' },
+  { question: 'How can I report a shelter issue?', answer: 'Use the contact form or call our office directly with details about the shelter and the issue.' },
+  { question: 'Is my personal data safe?', answer: 'We follow strict data protection policies. Your information is only used for service improvement.' }
+])
+
 const submitContactForm = () => {
   // Validate form
   if (!form.value.fullName || !form.value.email || !form.value.subject || !form.value.message) {
@@ -229,9 +255,18 @@ const submitContactForm = () => {
     return
   }
 
-  // Success
+  // Success - show submitted data
   formError.value = ''
   formSubmitted.value = true
+  
+  // Log submitted data to console
+  console.log('Form submitted with data:', {
+    name: form.value.fullName,
+    email: form.value.email,
+    subject: form.value.subject,
+    message: form.value.message,
+    timestamp: new Date().toLocaleString()
+  })
   
   // Reset form after 2 seconds
   setTimeout(() => {
@@ -243,6 +278,32 @@ const submitContactForm = () => {
     }
     formSubmitted.value = false
   }, 2000)
+}
+
+// Real-time listeners for form validation
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
+
+const onFullNameInput = (event) => {
+  form.value.fullName = event.target.value
+  console.log('Full Name entered:', form.value.fullName)
+}
+
+const onEmailInput = (event) => {
+  form.value.email = event.target.value
+  console.log('Email entered:', form.value.email, '- Valid:', validateEmail(form.value.email))
+}
+
+const onSubjectInput = (event) => {
+  form.value.subject = event.target.value
+  console.log('Subject entered:', form.value.subject)
+}
+
+const onMessageInput = (event) => {
+  form.value.message = event.target.value
+  console.log('Message entered - Length:', form.value.message.length, 'characters')
 }
 </script>
 

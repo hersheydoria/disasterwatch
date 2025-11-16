@@ -41,7 +41,7 @@ function navigate(to){
 }
 
 function logout(){
-  emit('logout')
+  emit('navigate', 'login')
 }
 </script>
 

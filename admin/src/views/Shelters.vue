@@ -139,11 +139,13 @@ async function refreshData() {
 
 function handleSearch(event) {
   searchQuery.value = event.target.value.toLowerCase()
+  console.log('Searching for:', searchQuery.value, '- Found:', filterShelters().length, 'results')
   filterShelters()
 }
 
 function handleStatusFilter(event) {
   statusFilter.value = event.target.value.toLowerCase()
+  console.log('Filtering by status:', statusFilter.value, '- Found:', filterShelters().length, 'results')
   filterShelters()
 }
 

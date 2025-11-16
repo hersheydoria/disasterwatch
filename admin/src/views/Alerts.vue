@@ -132,7 +132,54 @@
 import { ref, computed, onMounted } from 'vue'
 import { getAlerts, acknowledgeAlert } from '../api/client'
 
-const alerts = ref([])
+const alerts = ref([
+  {
+    id: 1,
+    location: 'Butuan City, Agusan del Norte',
+    alert_type: 'Mainshock',
+    magnitude: 4.5,
+    depth: 12,
+    timestamp: new Date(Date.now() - 2*60*60*1000).toISOString(),
+    status: 'active'
+  },
+  {
+    id: 2,
+    location: 'Surigao City, Surigao del Norte',
+    alert_type: 'Mainshock',
+    magnitude: 3.8,
+    depth: 15,
+    timestamp: new Date(Date.now() - 5*60*60*1000).toISOString(),
+    status: 'acknowledged'
+  },
+  {
+    id: 3,
+    location: 'Tandag, Surigao del Sur',
+    alert_type: 'Mainshock',
+    magnitude: 5.2,
+    depth: 18,
+    timestamp: new Date(Date.now() - 24*60*60*1000).toISOString(),
+    status: 'resolved'
+  },
+  {
+    id: 4,
+    location: 'Butuan City, Agusan del Norte',
+    alert_type: 'Aftershock',
+    magnitude: 3.2,
+    depth: 10,
+    timestamp: new Date(Date.now() - 3*60*60*1000).toISOString(),
+    status: 'active'
+  },
+  {
+    id: 5,
+    location: 'Bislig, Surigao del Sur',
+    alert_type: 'Aftershock',
+    magnitude: 2.9,
+    depth: 14,
+    timestamp: new Date(Date.now() - 2*24*60*60*1000).toISOString(),
+    status: 'resolved'
+  }
+])
+
 const searchQuery = ref('')
 const magnitudeFilter = ref('')
 const statusFilter = ref('')
@@ -174,22 +221,28 @@ const stats = computed(() => ({
 }))
 
 function handleSearch(event) {
-  // Filtering is handled by computed property
+  searchQuery.value = event.target.value
+  const count = filteredAlerts.value.length
+  console.log('Searching for:', searchQuery.value, '- Showing', count, 'results')
 }
 
 function handleMagnitudeFilter() {
-  // Filtering is handled by computed property
+  const count = filteredAlerts.value.length
+  console.log('Filter: Magnitude', magnitudeFilter.value, '- Showing', count, 'results')
 }
 
 function handleStatusFilter() {
-  // Filtering is handled by computed property
+  const count = filteredAlerts.value.length
+  console.log('Filter: Status', statusFilter.value, '- Showing', count, 'results')
 }
 
 async function handleAcknowledgeAlert(alertId) {
   try {
-    await acknowledgeAlert(alertId)
-    // Refresh alerts after acknowledging
-    await loadAlerts()
+    const alert = alerts.value.find(a => a.id === alertId)
+    if (alert) {
+      alert.status = 'acknowledged'
+    }
+    console.log('Alert acknowledged:', alertId)
   } catch (error) {
     console.error('Error acknowledging alert:', error)
   }
@@ -197,7 +250,6 @@ async function handleAcknowledgeAlert(alertId) {
 
 function viewAlertDetails(alertId) {
   console.log('Viewing details for earthquake:', alertId)
-  // Can be expanded to show earthquake details modal with seismic data
 }
 
 async function refreshAlerts() {
@@ -208,7 +260,10 @@ async function loadAlerts() {
   loading.value = true
   try {
     const response = await getAlerts(1)
-    alerts.value = Array.isArray(response) ? response : response.results || []
+    const newAlerts = Array.isArray(response) ? response : response.results || []
+    if (newAlerts.length > 0) {
+      alerts.value = newAlerts
+    }
   } catch (error) {
     console.error('Error loading alerts:', error)
   } finally {

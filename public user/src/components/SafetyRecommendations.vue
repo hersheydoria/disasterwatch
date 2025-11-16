@@ -486,7 +486,11 @@ onMounted(async () => {
           
           <div class="form-group">
             <label>Province</label>
-            <select v-model="selectedProvince" class="form-input">
+            <select 
+              v-model="selectedProvince" 
+              class="form-input"
+              @change="(event) => console.log('Province changed to:', event.target.value, 'Loading cities...')"
+            >
               <option v-for="province in provinces" :key="province" :value="province">
                 {{ province }}
               </option>
@@ -495,7 +499,12 @@ onMounted(async () => {
 
           <div class="form-group">
             <label>City/Municipality</label>
-            <select v-model="selectedCity" class="form-input" :disabled="cities.length === 0">
+            <select 
+              v-model="selectedCity" 
+              class="form-input" 
+              :disabled="cities.length === 0"
+              @change="(event) => console.log('City changed to:', event.target.value, 'Loading shelters and risk data...')"
+            >
               <option value="">-- Select City --</option>
               <option v-for="city in cities" :key="city" :value="city">
                 {{ city }}
@@ -513,10 +522,14 @@ onMounted(async () => {
               type="text" 
               class="form-input" 
               placeholder="Enter or search barangay..."
+              @input="(event) => console.log('Barangay entered:', event.target.value)"
             />
           </div>
 
-          <button class="btn-get-recommendations">
+          <button 
+            class="btn-get-recommendations"
+            @click="() => console.log('Getting recommendations for:', selectedCity, 'in', selectedProvince)"
+          >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline-icon">
               <circle cx="11" cy="11" r="8"/>
               <path d="m21 21-4.35-4.35"/>

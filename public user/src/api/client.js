@@ -1,94 +1,185 @@
-// Public User API Client
-// Handles all API calls to the Django backend
+// Public User API Client - Frontend Only (No Backend)
+// Uses mock data for demonstration
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-
-// Fetch wrapper with error handling
-async function fetchAPI(endpoint, options = {}) {
-  const url = `${API_BASE_URL}${endpoint}`;
-
-  try {
-    const response = await fetch(url, {
-      ...options,
-      headers: { 'Content-Type': 'application/json', ...options.headers }
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || errorData.detail || `HTTP ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('API Error:', error);
-    throw error;
+// Mock data for regions and cities
+const mockRegions = {
+  'Agusan del Norte': {
+    cities: ['Butuan City', 'Cabadbaran', 'Las Navas', 'Magallanes'],
+    shelters: [
+      { id: 1, name: 'Butuan City Multipurpose Hall', city: 'Butuan City', capacity: 500, status: 'operational' },
+      { id: 2, name: 'Cabadbaran Evacuation Center', city: 'Cabadbaran', capacity: 300, status: 'operational' }
+    ]
+  },
+  'Surigao del Sur': {
+    cities: ['Tandag', 'Bislig', 'San Agustin', 'Carrascal'],
+    shelters: [
+      { id: 3, name: 'Tandag Evacuation Center', city: 'Tandag', capacity: 400, status: 'operational' },
+      { id: 4, name: 'Bislig Community Center', city: 'Bislig', capacity: 250, status: 'operational' }
+    ]
+  },
+  'Davao Oriental': {
+    cities: ['Mati', 'Tagum', 'Lupon', 'Cateel'],
+    shelters: [
+      { id: 5, name: 'Mati Sports Complex', city: 'Mati', capacity: 600, status: 'operational' },
+      { id: 6, name: 'Tagum Convention Center', city: 'Tagum', capacity: 450, status: 'operational' }
+    ]
+  },
+  'Misamis Oriental': {
+    cities: ['Cagayan de Oro', 'Gingoog', 'Initao', 'Iligan'],
+    shelters: [
+      { id: 7, name: 'CDO Sports Complex', city: 'Cagayan de Oro', capacity: 800, status: 'operational' },
+      { id: 8, name: 'Gingoog Evacuation Center', city: 'Gingoog', capacity: 350, status: 'operational' }
+    ]
   }
 }
 
-// Shelters endpoints (public - no auth needed)
+// Mock earthquake data
+const mockEarthquakes = [
+  { id: 1, magnitude: 5.2, depth: 12.5, location: 'Butuan', latitude: 8.97, longitude: 125.53, timestamp: '2024-01-15 08:30', intensity: 'Moderate' },
+  { id: 2, magnitude: 4.8, depth: 15.0, location: 'Bislig', latitude: 8.75, longitude: 126.09, timestamp: '2024-01-14 14:20', intensity: 'Weak' },
+  { id: 3, magnitude: 5.5, depth: 18.0, location: 'Tandag', latitude: 8.62, longitude: 126.35, timestamp: '2024-01-13 10:15', intensity: 'Moderate' }
+]
+
+// Shelters endpoints (mock data)
 export async function getShelters(page = 1) {
-  return fetchAPI(`/shelters/?page=${page}`);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const allShelters = Object.values(mockRegions).flatMap(region => region.shelters)
+      resolve({ results: allShelters })
+    }, 100)
+  })
 }
 
 export async function getSheltersByRegion(regionId) {
-  return fetchAPI(`/shelters/by_region/?region_id=${regionId}`);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const shelters = mockRegions[regionId]?.shelters || []
+      resolve({ results: shelters })
+    }, 100)
+  })
 }
 
 export async function getSheltersByStatus(status) {
-  return fetchAPI(`/shelters/by_status/?status=${status}`);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const allShelters = Object.values(mockRegions).flatMap(region => region.shelters)
+      const filtered = allShelters.filter(s => s.status === status)
+      resolve({ results: filtered })
+    }, 100)
+  })
 }
 
 export async function getSheltersByLocation(city) {
-  return fetchAPI(`/shelters/by_location/?city=${encodeURIComponent(city)}`);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const allShelters = Object.values(mockRegions).flatMap(region => region.shelters)
+      const filtered = allShelters.filter(s => s.city.toLowerCase() === city.toLowerCase())
+      resolve({ results: filtered })
+    }, 100)
+  })
 }
 
-// Earthquakes endpoints
+// Earthquakes endpoints (mock data)
 export async function getEarthquakes(page = 1) {
-  return fetchAPI(`/earthquakes/?page=${page}`);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ results: mockEarthquakes })
+    }, 100)
+  })
 }
 
 export async function getRecentEarthquakes() {
-  return fetchAPI('/earthquakes/recent/');
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ results: mockEarthquakes.slice(0, 3) })
+    }, 100)
+  })
 }
 
 export async function getEarthquakesByRegion(regionId) {
-  return fetchAPI(`/earthquakes/by_region/?region_id=${regionId}`);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ results: mockEarthquakes.slice(0, 2) })
+    }, 100)
+  })
 }
 
 export async function getEarthquakesByLocation(latitude, longitude, radiusKm = 50) {
-  return fetchAPI(`/earthquakes/by_location/?latitude=${latitude}&longitude=${longitude}&radius=${radiusKm}`);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ results: mockEarthquakes })
+    }, 100)
+  })
 }
 
-// Alerts endpoints
+// Alerts endpoints (mock data)
 export async function getAlerts(page = 1) {
-  return fetchAPI(`/alerts/?page=${page}`);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ results: [] })
+    }, 100)
+  })
 }
 
 export async function getAlertsByStatus(status) {
-  return fetchAPI(`/alerts/by_status/?status=${status}`);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ results: [] })
+    }, 100)
+  })
 }
 
-// Safety Tips endpoints (public)
+// Safety Tips endpoints (mock data)
 export async function getSafetyTips(page = 1) {
-  return fetchAPI(`/safety-tips/?page=${page}`);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ results: [] })
+    }, 100)
+  })
 }
 
 export async function getSafetyTipsByCategory(category) {
-  return fetchAPI(`/safety-tips/by_category/?category=${category}`);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ results: [] })
+    }, 100)
+  })
 }
 
-// Earthquake Predictions (AI-based analysis)
+// Earthquake Predictions (mock data)
 export async function getEarthquakePredictions() {
-  return fetchAPI('/predictions/');
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ results: [] })
+    }, 100)
+  })
 }
 
 export async function getEarthquakeStatistics() {
-  return fetchAPI('/statistics/');
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        totalEarthquakes: mockEarthquakes.length,
+        averageMagnitude: 5.17,
+        highestMagnitude: 5.5,
+        averageDepth: 15.17
+      })
+    }, 100)
+  })
 }
 
-// Regions endpoints
+// Regions endpoints (mock data)
 export async function getRegions() {
-  return fetchAPI('/regions/');
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const regions = Object.keys(mockRegions).map(name => ({
+        id: name,
+        name: name,
+        cities: mockRegions[name].cities
+      }))
+      resolve({ results: regions })
+    }, 100)
+  })
 }
 
 export default {

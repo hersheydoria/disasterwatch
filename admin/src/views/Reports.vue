@@ -7,7 +7,12 @@
     <!-- Filter Bar -->
     <div class="filter-bar">
       <div class="search-box">
-        <input v-model="searchQuery" type="text" placeholder="Search by report name or report type..." />
+        <input 
+          v-model="searchQuery" 
+          type="text" 
+          placeholder="Search by report name or report type..."
+          @input="handleSearchInput"
+        />
       </div>
       <div class="filter-controls">
         <select v-model="filterDate">
@@ -146,8 +151,21 @@
 import { ref, computed, onMounted } from 'vue'
 import { getReports, getAIRecommendations } from '../api/client'
 
-const reports = ref([])
-const recommendations = ref([])
+const reports = ref([
+  { id: 1, shelter_name: 'Butuan City Multipurpose Hall', status: 'active', description: 'Capacity utilization at 65%', created_at: new Date(Date.now() - 2*60*60*1000).toISOString(), created_by: 'Admin' },
+  { id: 2, shelter_name: 'Surigao City Evacuation Center', status: 'updated', description: 'Emergency supplies restocked', created_at: new Date(Date.now() - 5*60*60*1000).toISOString(), created_by: 'Coordinator A' },
+  { id: 3, shelter_name: 'Tandag Multipurpose Center', status: 'alert', description: 'Medical staff shortage reported', created_at: new Date(Date.now() - 12*60*60*1000).toISOString(), created_by: 'Coordinator B' },
+  { id: 4, shelter_name: 'Cabadbaran Evacuation Center', status: 'updated', description: 'Structural inspection completed', created_at: new Date(Date.now() - 24*60*60*1000).toISOString(), created_by: 'Admin' },
+  { id: 5, shelter_name: 'Bislig Community Center', status: 'active', description: 'Earthquake aftershock monitoring active', created_at: new Date(Date.now() - 48*60*60*1000).toISOString(), created_by: 'Coordinator C' }
+])
+
+const recommendations = ref([
+  { id: 1, created_at: new Date(Date.now() - 2*60*60*1000).toISOString(), user_name: 'System AI', recommendation_type: 'Capacity Increase', shelter_name: 'Butuan City Hall', status: 'high', risk_level: 'HIGH', outcome: 'implemented' },
+  { id: 2, created_at: new Date(Date.now() - 6*60*60*1000).toISOString(), user_name: 'System AI', recommendation_type: 'Supply Restock', shelter_name: 'Surigao City Center', status: 'medium', risk_level: 'MEDIUM', outcome: 'pending' },
+  { id: 3, created_at: new Date(Date.now() - 12*60*60*1000).toISOString(), user_name: 'System AI', recommendation_type: 'Staff Training', shelter_name: 'Tandag Center', status: 'high', risk_level: 'HIGH', outcome: 'scheduled' },
+  { id: 4, created_at: new Date(Date.now() - 24*60*60*1000).toISOString(), user_name: 'System AI', recommendation_type: 'Maintenance Check', shelter_name: 'Cabadbaran Center', status: 'medium', risk_level: 'MEDIUM', outcome: 'completed' },
+  { id: 5, created_at: new Date(Date.now() - 48*60*60*1000).toISOString(), user_name: 'System AI', recommendation_type: 'Equipment Update', shelter_name: 'Bislig Center', status: 'low', risk_level: 'LOW', outcome: 'dismissed' }
+])
 const currentPage = ref(1)
 const filterDate = ref('Last 7 days')
 const searchQuery = ref('')
@@ -158,8 +176,8 @@ const filteredReports = computed(() => {
 
   if (searchQuery.value) {
     filtered = filtered.filter(report => 
-      report.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      report.report_type.toLowerCase().includes(searchQuery.value.toLowerCase())
+      report.shelter_name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      report.status.toLowerCase().includes(searchQuery.value.toLowerCase())
     )
   }
 
@@ -168,7 +186,7 @@ const filteredReports = computed(() => {
 
 const stats = computed(() => ({
   total: reports.value.length,
-  newEntries: reports.value.filter(r => r.status === 'new').length,
+  newEntries: reports.value.filter(r => r.status === 'alert').length,
   updated: reports.value.filter(r => r.status === 'updated').length,
   active: reports.value.filter(r => r.status === 'active').length
 }))
@@ -183,7 +201,7 @@ function exportCSV() {
   const rows = filteredReports.value.map(r => [
     `#RPT-${String(r.id).padStart(4, '0')}`,
     r.shelter_name,
-    r.report_type,
+    r.status,
     r.description,
     new Date(r.created_at).toLocaleString(),
     r.created_by
@@ -196,11 +214,17 @@ function exportCSV() {
   a.href = url
   a.download = `reports-${Date.now()}.csv`
   a.click()
+  console.log('Exported', filteredReports.value.length, 'reports to CSV')
 }
 
 function exportPDF() {
+  console.log('PDF export - Exporting', filteredReports.value.length, 'reports')
   alert('PDF export functionality coming soon')
-  // Can be implemented with a library like jsPDF
+}
+
+function handleSearchInput(event) {
+  searchQuery.value = event.target.value
+  console.log('Searching reports:', searchQuery.value, '- Found:', filteredReports.value.length, 'results')
 }
 
 function viewReportDetails(reportId) {

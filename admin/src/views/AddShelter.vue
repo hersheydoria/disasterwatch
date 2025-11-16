@@ -24,25 +24,41 @@
           <div class="form-row">
             <label class="form-group">
               <span>Shelter Name*</span>
-              <input v-model="form.name" placeholder="Enter shelter name" />
+              <input 
+                v-model="form.name" 
+                placeholder="Enter shelter name"
+                @input="onShelterNameInput"
+              />
             </label>
           </div>
 
           <div class="form-row">
             <label class="form-group">
               <span>Address / Location*</span>
-              <input v-model="form.address" placeholder="Enter complete address" />
+              <input 
+                v-model="form.address" 
+                placeholder="Enter complete address"
+                @input="onAddressInput"
+              />
             </label>
           </div>
 
           <div class="form-row two">
             <label class="form-group">
               <span>Coordinates</span>
-              <input v-model="form.latitude" placeholder="Latitude" />
+              <input 
+                v-model="form.latitude" 
+                placeholder="Latitude"
+                @input="onLatitudeInput"
+              />
             </label>
             <label class="form-group">
               <span></span>
-              <input v-model="form.longitude" placeholder="Longitude" />
+              <input 
+                v-model="form.longitude" 
+                placeholder="Longitude"
+                @input="onLongitudeInput"
+              />
             </label>
             <button type="button" class="map-btn">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -55,11 +71,19 @@
           <div class="form-row two">
             <label class="form-group">
               <span>Capacity*</span>
-              <input v-model="form.capacity" type="number" placeholder="0" />
+              <input 
+                v-model="form.capacity" 
+                type="number" 
+                placeholder="0"
+                @input="onCapacityInput"
+              />
             </label>
             <label class="form-group">
               <span>Status*</span>
-              <select v-model="form.status">
+              <select 
+                v-model="form.status"
+                @change="onStatusChange"
+              >
                 <option>Select status</option>
                 <option>Active</option>
                 <option>Inactive</option>
@@ -71,18 +95,30 @@
           <div class="form-row two">
             <label class="form-group">
               <span>Contact Person*</span>
-              <input v-model="form.contact_person" placeholder="Enter contact person name" />
+              <input 
+                v-model="form.contact_person" 
+                placeholder="Enter contact person name"
+                @input="onContactPersonInput"
+              />
             </label>
             <label class="form-group">
               <span>Contact Number*</span>
-              <input v-model="form.contact_number" placeholder="Enter contact number" />
+              <input 
+                v-model="form.contact_number" 
+                placeholder="Enter contact number"
+                @input="onContactNumberInput"
+              />
             </label>
           </div>
 
           <div class="form-row">
             <label class="form-group">
               <span>Additional Notes</span>
-              <textarea v-model="form.notes" placeholder="Enter any additional information about the shelter."></textarea>
+              <textarea 
+                v-model="form.notes" 
+                placeholder="Enter any additional information about the shelter."
+                @input="onNotesInput"
+              ></textarea>
             </label>
           </div>
 
@@ -104,8 +140,7 @@
 </template>
 
 <script setup>
-import { reactive, inject } from 'vue'
-import { defineEmits } from 'vue'
+import { ref, reactive, inject } from 'vue'
 
 const emit = defineEmits(['cancel'])
 const navigate = inject('navigate', () => {})
@@ -122,15 +157,77 @@ const form = reactive({
   notes: ''
 })
 
+const submittedData = ref(null)
+
 function submit() {
-  // TODO: submit to API
-  console.log('Submitting shelter:', form)
-  alert('Shelter saved! (Demo)')
+  // Validate form
+  if (!form.name || !form.address || !form.capacity || !form.status) {
+    alert('Please fill out required fields')
+    return
+  }
+
+  // Store submitted data
+  submittedData.value = { ...form }
+  
+  // Log to console
+  console.log('Submitting shelter:', submittedData.value)
+  alert(`Shelter "${form.name}" saved successfully!\nCapacity: ${form.capacity}\nLocation: ${form.address}`)
+  
+  // Reset form and navigate
+  Object.keys(form).forEach(key => {
+    form[key] = ''
+  })
   navigate('shelters')
 }
 
 function cancel() {
   navigate('shelters')
+}
+
+// Real-time input listeners
+const onShelterNameInput = (event) => {
+  form.name = event.target.value
+  console.log('Shelter name:', form.name)
+}
+
+const onAddressInput = (event) => {
+  form.address = event.target.value
+  console.log('Address:', form.address)
+}
+
+const onLatitudeInput = (event) => {
+  form.latitude = event.target.value
+  console.log('Latitude:', form.latitude)
+}
+
+const onLongitudeInput = (event) => {
+  form.longitude = event.target.value
+  console.log('Longitude:', form.longitude)
+}
+
+const onCapacityInput = (event) => {
+  form.capacity = event.target.value
+  console.log('Capacity:', form.capacity)
+}
+
+const onStatusChange = (event) => {
+  form.status = event.target.value
+  console.log('Status changed to:', form.status)
+}
+
+const onContactPersonInput = (event) => {
+  form.contact_person = event.target.value
+  console.log('Contact person:', form.contact_person)
+}
+
+const onContactNumberInput = (event) => {
+  form.contact_number = event.target.value
+  console.log('Contact number:', form.contact_number)
+}
+
+const onNotesInput = (event) => {
+  form.notes = event.target.value
+  console.log('Notes:', form.notes)
 }
 </script>
 
