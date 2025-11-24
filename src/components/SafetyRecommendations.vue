@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const emit = defineEmits(['navigate'])
 
@@ -10,13 +10,58 @@ const selectedBarangay = ref('')
 
 // Mock data for locations
 const provinces = ref(['Agusan del Norte', 'Agusan del Sur', 'Dinagat Islands', 'Surigao del Norte', 'Surigao del Sur'])
-const cities = ref([
-  'Butuan City',
-  'Surigao City',
-  'Cabadbaran City',
-  'Bislig City',
-  'Tandag City'
-])
+// Data mapping: Province -> Cities/Municipalities
+const citiesByProvince = {
+  'Agusan del Norte': [
+    'Butuan City',
+    'Cabadbaran City',
+    'Nasipit',
+    'Magallanes',
+    'Remedios T. Romualdez',
+    'Kitcharao'
+  ],
+  'Agusan del Sur': [
+    'Bayugan City',
+    'San Francisco',
+    'Prosperidad', // Capital
+    'Trento',
+    'Bunawan',
+    'Talacogon',
+    'Rosario',
+    'Esperanza'
+  ],
+  'Surigao del Norte': [
+    'Surigao City',
+    'Siargao (General Luna)',
+    'Placer',
+    'Mainit'
+  ],
+  'Surigao del Sur': [
+    'Bislig City',
+    'Tandag City',
+    'Hinatuan',
+    'Barobo'
+  ],
+  'Dinagat Islands': [
+    'San Jose',
+    'Loreto',
+    'Cagdianao'
+  ]
+}
+// Computed property: Automatically updates the list when province changes
+const availableCities = computed(() => {
+  return citiesByProvince[selectedProvince.value] || []
+})
+
+// Watcher: Automatically resets the selected city to the first option when province changes
+watch(selectedProvince, (newValue) => {
+  const newOptions = citiesByProvince[newValue] || []
+  if (newOptions.length > 0) {
+    selectedCity.value = newOptions[0]
+  } else {
+    selectedCity.value = ''
+  }
+})
 
 // Current risk assessment
 const currentRisk = ref({
@@ -155,7 +200,7 @@ const preparednessTips = ref([
           <div class="form-group">
             <label>City/Municipality</label>
             <select v-model="selectedCity" class="form-input">
-              <option v-for="city in cities" :key="city" :value="city">
+              <option v-for="city in availableCities" :key="city" :value="city">
                 {{ city }}
               </option>
             </select>
