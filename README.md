@@ -1,189 +1,87 @@
-# DisasterWatch - Frontend Only
+# DisasterWatch Frontend
 
-A disaster management and earthquake tracking web application built with Vue.js. This is a frontend-only version with mock data for demonstration purposes.
+DisasterWatch is a dual-application Vue 3 experience that lets the public monitor seismic activity and request support while giving coordinators a lightweight admin console to manage shelters, alerts, and reports. This repository ships mock data in place of a backend, and the contact workflow uses the RESEND API for email delivery.
 
-## 🎯 Project Overview
+## 🧭 System Flow
 
-DisasterWatch provides:
-- **Earthquake tracking** display for the Caraga region
-- **Evacuation shelter** location and information
-- **AI-powered safety recommendations** based on location
-- **Risk assessment** and preparedness guidance
-- **Emergency resources** and medical facilities
+### Public User App (`public user/`)
+1. Visitor lands on the Home page, sees regional highlights, earthquake cards, and quick facts.
+2. LiveMap and Safety Recommendations rely on the mock `client.js` data. Selecting a province/city updates the displayed shelter and earthquake cards instantly via computed filters.
+3. Shelter Finder lists evacuation centers with contact info, capacity, and status icons.
+4. In the Safety or Contact views the visitor fills the contact form. Submitting the form invokes the RESEND API endpoint (configured in `src/api/client.js`) so the request is delivered to the DisasterWatch admin inbox without needing a backend server.
 
-## 📁 Project Structure
+### Admin Dashboard (`admin/`)
+1. Coordinators open the admin app and authenticate via the built-in Login view (local view-only state; no backend verification).
+2. After logging in, the Sidebar navigation shows Dashboard, Shelters, Alerts, Reports, and Settings views powered by the mock API.
+3. The Dashboard aggregates shelter counts, alerts, AI insights, and recent activities. Buttons emit navigation events via the shared `navigate` context.
+4. Shelter Management lets admins search, filter by status, and edit mock shelter details.
+5. Alerts and Reports show earthquake events, incident reports, and AI recommendation logs. Export buttons log the current record count for tracing.
+6. The Settings view currently shares form listeners that log input data; those hooks can become API calls in a full implementation.
+7. Logout simply resets the local route to Login for development convenience.
+
+## 🏗️ Project Structure
 
 ```
 disasterwatch/
-├── admin/                     # Admin Dashboard (Vue.js)
-│   ├── src/
-│   │   ├── api/client.js      # API methods (mock data)
-│   │   ├── views/             # Dashboard, Shelters, Alerts, Reports
-│   │   └── components/        # Reusable components
-│   └── package.json
-│
-├── public user/               # Public User App (Vue.js)
-│   ├── src/
-│   │   ├── api/client.js      # Public API methods (mock data)
-│   │   ├── components/        # HomePage, LiveMap, SafetyRecommendations
-│   │   └── views/
-│   └── package.json
-│
-└── README.md
+├── admin/                     # Coordinator dashboard with mock API data
+├── public user/               # Public-facing experience with LiveMap and contact form
+└── README.md                  # This overview
 ```
 
-## 🚀 Quick Start
+## 🚀 Getting Started
 
-### Prerequisites
-- **Node.js 16+**
-- **npm** or **yarn**
-
-### Setup Admin Dashboard
+1. Install dependencies and run both apps in parallel terminals (two shells are ideal):
 
 ```bash
-cd admin
-npm install
-npm run dev
+cd admin && npm install && npm run dev
 ```
-
-Admin Dashboard runs at: **http://localhost:5173/**
-
-### Setup Public User App
 
 ```bash
-cd "public user"
-npm install
-npm run dev
+cd "public user" && npm install && npm run dev
 ```
 
-Public User App runs at: **http://localhost:5174/** (or next available port)
+2. Admin interface defaults to port `5173`, the public user app to `5174` (or the next available port).
 
-## 📱 Application Features
+## 🔌 RESEND API Contact Flow
 
-### Admin Dashboard
-- **Dashboard Overview** - Statistics and metrics
-- **Shelter Management** - View shelter information
-- **Earthquake Data** - Earthquake information display
-- **Settings** - System configuration
+- The public user contact form issues an email through the RESEND API.
+- Configure `RESEND_API_KEY` and recipient address in `public user/src/api/client.js`.
+- The client-side function `sendContactEmail` constructs the payload (subject/body/metadata) and posts directly to `https://api.resend.com/emails`.
+- This keeps the experience backend-free while still notifying admins when visitors reach out.
 
-### Public User App
-- **Home Page** - Welcome and introduction
-- **Safety Recommendations** - AI-powered disaster preparedness tips
-- **Shelter Finder** - Locate nearby evacuation shelters
-- **Earthquake Information** - Local earthquake data
-- **Safety Resources** - Emergency contacts and guides
+## 🧩 Mock Data Highlights
 
-## 🛠️ Technology Stack
+- **Regions & Cities**: Predefined provinces with cities that feed all data cards.
+- **Shelters**: Eight shelters with capacity, status, and last-updated metadata.
+- **Earthquakes**: Sample events with magnitude/depth/time.
+- **Teams/Partners**: Static lists used in public home and about pages.
+- **Safety Resources**: Office contacts, emergency hotlines, and FAQ entries.
 
-### Frontend
-- **Vue.js 3** - Reactive UI framework
-- **Vite** - Lightning-fast build tool
-- **CSS3** - Responsive styling
-- **JavaScript ES6+** - Modern JavaScript
+## 🛠️ Customization Notes
 
-### Data
-- **Mock Data** - Built-in demonstration data
-- **LocalStorage** - Client-side data persistence
+- Expand `client.js` mock data arrays to trial new scenarios.
+- The shared API client exposes helpers (`getEarthquakes`, `getShelters`, etc.) that the views consume.
+- Add real API hooks by replacing the mock functions and wiring them to a backend when available.
 
-## 📊 Mock Data
+## ✅ Key Features
 
-The application includes mock data for:
-- **Regions**: Agusan del Norte, Surigao del Sur, Davao Oriental, Misamis Oriental
-- **Shelters**: Multiple evacuation centers with capacity information
-- **Earthquakes**: Sample seismic event data for the region
-- **Safety Tips**: Disaster preparedness recommendations
+- Dual Vue applications (admin + public) with shared mock data
+- RESEND-powered contact email flow without a server
+- Form input listeners across admin views for future data binding
+- Responsive layouts, search/filter helpers, and navigation via `Sidebar.vue`
+- Simple login/logout experience that can be wired to real auth later
 
-## 🎨 Features Implemented
+## 🧪 Testing & Validation
 
-### Core Features
-✅ Location-based safety recommendations
-✅ Earthquake information display
-✅ Evacuation shelter locator
-✅ Risk assessment for locations
-✅ Dynamic medical facilities finder
-✅ Province/City/Barangay selection
-✅ AI-powered recommendation system
-✅ Safety preparedness tips
+- Run `npm run dev` in both apps to ensure UI loads and navigation works.
+- Use the browser console to view logged events from form listeners and button handlers.
+- The contact form logs the RESEND payload before the fetch to aid debugging.
 
-### UI/UX Features
-✅ Responsive design (mobile, tablet, desktop)
-✅ Real-time data updates
-✅ Search and filter functionality
-✅ Error handling and validation
-✅ Loading states
-✅ Accessibility features
-✅ Intuitive navigation
+## 🗂️ Deployment Notes
 
-### Technical Features
-✅ Component-based architecture
-✅ Vue 3 Composition API
-✅ Mock data with realistic structure
-✅ Location-based data filtering
-✅ Responsive API client
-✅ Error logging and handling
-
-## 🚀 Running the Application
-
-### Development Mode
-```bash
-# Admin Dashboard
-cd admin
-npm install
-npm run dev
-
-# Public User App (in separate terminal)
-cd "public user"
-npm install
-npm run dev
-```
-
-### Building for Production
-```bash
-# Admin
-cd admin
-npm run build
-
-# Public User
-cd "public user"
-npm run build
-```
-
-The built files will be in the `dist/` directory of each app.
-
-## 🔧 File Structure
-
-### API Client (`src/api/client.js`)
-The API client contains mock data for:
-- Regions and their cities
-- Shelters with capacity and location info
-- Earthquake events with magnitude and depth
-- Safety tips and recommendations
-
-### Components
-- `SafetyRecommendations.vue` - Main component for location-based recommendations
-- `HomePage.vue` - Public app home page
-- `LiveMap.vue` - Earthquake data visualization
-- `Dashboard.vue` - Admin overview
-
-## 📝 Customization
-
-To add more mock data, edit `src/api/client.js` and update:
-1. `mockRegions` - Add new provinces and cities
-2. `mockEarthquakes` - Add earthquake events
-3. API functions - Modify data filtering logic
-
-## 📞 Support
-
-For issues or questions:
-1. Check browser console for error messages
-2. Verify Node.js and npm are installed correctly
-3. Clear browser cache if data appears outdated
-4. Check that both apps are running on separate ports
+- Use `npm run build` inside each directory to produce production artifacts in their respective `dist/` folders.
+- Serve those static outputs from any web server or integrate into a common hosting solution.
 
 ## 📄 License
 
-Proprietary - DisasterWatch System
-
-## 👥 Development
-
-**DisasterWatch** - Keeping Communities Safe During Disasters 🌍
+Proprietary – DisasterWatch System
