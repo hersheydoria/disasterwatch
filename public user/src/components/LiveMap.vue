@@ -36,12 +36,97 @@ const markers = ref([])
 // Define emits for navigation
 const emit = defineEmits(['navigate'])
 
+// City/Municipality coordinates for Caraga Region
+const CARAGA_CITY_COORDINATES = {
+  // Agusan del Norte
+  'Butuan City': { lat: 8.9475, lng: 125.5406 },
+  'Cabadbaran City': { lat: 9.1236, lng: 125.5339 },
+  'Buenavista': { lat: 8.9806, lng: 125.4083 },
+  'Carmen': { lat: 9.2167, lng: 125.6833 },
+  'Jabonga': { lat: 9.3500, lng: 125.5167 },
+  'Kitcharao': { lat: 9.4500, lng: 125.5667 },
+  'Las Nieves': { lat: 9.1333, lng: 125.5333 },
+  'Magallanes': { lat: 9.0333, lng: 125.5167 },
+  'Nasipit': { lat: 8.9672, lng: 125.3417 },
+  'Remedios T. Romualdez': { lat: 9.0667, lng: 125.5833 },
+  'Santiago': { lat: 9.2000, lng: 125.5333 },
+  'Tubay': { lat: 9.1667, lng: 125.5000 },
+  // Agusan del Sur
+  'Bayugan City': { lat: 8.7133, lng: 125.7672 },
+  'Bunawan': { lat: 8.1833, lng: 125.9833 },
+  'Esperanza': { lat: 8.2000, lng: 125.6667 },
+  'La Paz': { lat: 8.2167, lng: 125.7000 },
+  'Loreto': { lat: 8.0333, lng: 125.8000 },
+  'Prosperidad': { lat: 8.6000, lng: 125.9167 },
+  'Rosario': { lat: 8.1833, lng: 125.8333 },
+  'San Francisco': { lat: 8.5000, lng: 125.9833 },
+  'San Luis': { lat: 8.0500, lng: 125.7833 },
+  'Santa Josefa': { lat: 8.0167, lng: 125.8500 },
+  'Sibagat': { lat: 8.8167, lng: 125.7167 },
+  'Talacogon': { lat: 8.4500, lng: 125.7833 },
+  'Trento': { lat: 8.0500, lng: 126.0667 },
+  'Veruela': { lat: 8.1500, lng: 125.7667 },
+  // Dinagat Islands
+  'Basilisa': { lat: 10.0500, lng: 125.6167 },
+  'Cagdianao': { lat: 10.0333, lng: 125.6500 },
+  'Dinagat': { lat: 10.1333, lng: 125.6000 },
+  'Libjo': { lat: 10.2500, lng: 125.5500 },
+  'San Jose': { lat: 10.0833, lng: 125.5333 },
+  'Tubajon': { lat: 10.1667, lng: 125.5833 },
+  // Surigao del Norte
+  'Surigao City': { lat: 9.7844, lng: 125.4888 },
+  'Alegria': { lat: 9.7167, lng: 125.5500 },
+  'Bacuag': { lat: 9.6000, lng: 125.6667 },
+  'Burgos': { lat: 9.8833, lng: 125.7333 },
+  'Claver': { lat: 9.5333, lng: 125.7167 },
+  'Dapa': { lat: 9.7583, lng: 126.0539 },
+  'Del Carmen': { lat: 9.8500, lng: 126.0333 },
+  'General Luna': { lat: 9.7833, lng: 126.1500 },
+  'Gigaquit': { lat: 9.5500, lng: 125.6833 },
+  'Mainit': { lat: 9.5333, lng: 125.5167 },
+  'Malimono': { lat: 9.5667, lng: 125.4000 },
+  'Pilar': { lat: 9.8833, lng: 126.0833 },
+  'Placer': { lat: 9.6500, lng: 125.5833 },
+  'San Benito': { lat: 9.9333, lng: 125.5333 },
+  'San Francisco': { lat: 9.9000, lng: 125.4667 },
+  'San Isidro': { lat: 9.9333, lng: 125.6000 },
+  'Santa Monica': { lat: 9.8000, lng: 126.0667 },
+  'Sison': { lat: 9.8333, lng: 125.5833 },
+  'Socorro': { lat: 9.6167, lng: 125.9500 },
+  'Tagana-an': { lat: 9.6667, lng: 125.5000 },
+  'Tubod': { lat: 9.6500, lng: 125.4667 },
+  // Surigao del Sur
+  'Bislig City': { lat: 8.2167, lng: 126.3500 },
+  'Tandag City': { lat: 9.0667, lng: 126.1833 },
+  'Barobo': { lat: 8.5333, lng: 126.1333 },
+  'Bayabas': { lat: 8.4667, lng: 126.2667 },
+  'Cagwait': { lat: 8.6333, lng: 126.2833 },
+  'Cantilan': { lat: 9.3167, lng: 125.9833 },
+  'Carmen': { lat: 8.3833, lng: 126.1167 },
+  'Carrascal': { lat: 9.3667, lng: 125.9500 },
+  'Cortes': { lat: 9.2500, lng: 125.9833 },
+  'Hinatuan': { lat: 8.3667, lng: 126.3333 },
+  'Lanuza': { lat: 9.2333, lng: 126.0000 },
+  'Lianga': { lat: 8.6333, lng: 126.1000 },
+  'Lingig': { lat: 8.0500, lng: 126.4167 },
+  'Madrid': { lat: 9.2667, lng: 126.0333 },
+  'Marihatag': { lat: 8.8000, lng: 126.3000 },
+  'San Agustin': { lat: 8.6167, lng: 126.1833 },
+  'San Miguel': { lat: 8.9333, lng: 126.0500 },
+  'Tagbina': { lat: 8.4500, lng: 126.1333 },
+  'Tago': { lat: 9.0167, lng: 126.2333 }
+}
+
 // Data from API
 const earthquakeZones = ref([])
 const shelters = ref([])
 const hospitals = ref([])
 const predictions = ref([])
 const loading = ref(false)
+const highlightedShelters = ref([])
+const viewingSheltersFromSafety = ref(false)
+const userLocationMarker = ref(null)
+const aiRecommendedShelterData = ref(null)
 
 // Fetch data from API
 async function loadMapData() {
@@ -308,6 +393,9 @@ onMounted(async () => {
   
   // Now that map is initialized and data is loaded, update markers
   updateMarkers()
+  
+  // Check if we have shelters to view from Safety Recommendations page
+  checkForSheltersFromSafety()
 })
 
 // Clean up map when component unmounts
@@ -338,16 +426,29 @@ const updateMarkers = () => {
     predictions: filteredPredictions.value.length
   })
   
-  // Add zone markers
+  // Add zone markers (Risk Zones)
   filteredZones.value.forEach(zone => {
     try {
       console.log(`Adding zone: ${zone.name} at [${zone.lat}, ${zone.lng}]`)
-      const marker = L.circleMarker([zone.lat, zone.lng], {
-        color: getZoneColor(zone.riskLevel),
-        fillColor: getZoneColor(zone.riskLevel),
-        fillOpacity: 0.8,
-        radius: 15
-      }).addTo(map)
+      
+      // Create a custom icon with label for risk zones
+      const zoneIcon = L.divIcon({
+        html: `<div class="labeled-marker risk-zone-marker">
+          <div class="marker-icon" style="background: ${getZoneColor(zone.riskLevel)}; border-color: ${getZoneColor(zone.riskLevel)};">
+            <svg viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="1" style="width: 18px; height: 18px;">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13" stroke="white" stroke-width="2"/>
+              <circle cx="12" cy="17" r="1" fill="white"/>
+            </svg>
+          </div>
+          <div class="marker-label risk-label" style="background: ${getZoneColor(zone.riskLevel)};">Risk Zone</div>
+        </div>`,
+        className: 'custom-labeled-icon',
+        iconSize: [50, 60],
+        iconAnchor: [25, 50]
+      })
+      
+      const marker = L.marker([zone.lat, zone.lng], { icon: zoneIcon }).addTo(map)
       
       marker.bindPopup(`
         <div class="popup-content">
@@ -365,19 +466,22 @@ const updateMarkers = () => {
     }
   })
   
-  // Add shelter markers
+  // Add shelter markers (Evacuation Centers)
   filteredShelters.value.forEach(shelter => {
     try {
       const shelterIcon = L.divIcon({
-        html: `<div style="background: white; border: 3px solid #FF7A00; border-radius: 6px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#FF7A00" stroke-width="2" style="width: 20px; height: 20px;">
-            <path d="M3 12l9-9 9 9v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-            <polyline points="9,22 9,12 15,12 15,22"/>
-          </svg>
+        html: `<div class="labeled-marker shelter-marker">
+          <div class="marker-icon" style="background: white; border-color: #FF7A00;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#FF7A00" stroke-width="2" style="width: 20px; height: 20px;">
+              <path d="M3 12l9-9 9 9v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9,22 9,12 15,12 15,22"/>
+            </svg>
+          </div>
+          <div class="marker-label shelter-label">Evacuation</div>
         </div>`,
-        className: 'custom-shelter-icon',
-        iconSize: [40, 40],
-        iconAnchor: [20, 40]
+        className: 'custom-labeled-icon',
+        iconSize: [55, 60],
+        iconAnchor: [27, 50]
       })
       
       console.log(`Adding shelter: ${shelter.name} at [${shelter.lat}, ${shelter.lng}]`)
@@ -403,16 +507,19 @@ const updateMarkers = () => {
   filteredHospitals.value.forEach(hospital => {
     try {
       const hospitalIcon = L.divIcon({
-        html: `<div style="background: white; border: 3px solid #00AA00; border-radius: 6px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#00AA00" stroke-width="2" style="width: 20px; height: 20px;">
-            <rect x="3" y="6" width="18" height="12" rx="2"/>
-            <path d="M9 12h6"/>
-            <path d="M12 9v6"/>
-          </svg>
+        html: `<div class="labeled-marker hospital-marker">
+          <div class="marker-icon" style="background: white; border-color: #00AA00;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#00AA00" stroke-width="2" style="width: 20px; height: 20px;">
+              <rect x="3" y="6" width="18" height="12" rx="2"/>
+              <path d="M9 12h6"/>
+              <path d="M12 9v6"/>
+            </svg>
+          </div>
+          <div class="marker-label hospital-label">Hospital</div>
         </div>`,
-        className: 'custom-hospital-icon',
-        iconSize: [40, 40],
-        iconAnchor: [20, 40]
+        className: 'custom-labeled-icon',
+        iconSize: [55, 60],
+        iconAnchor: [27, 50]
       })
       
       console.log(`Adding hospital: ${hospital.name} at [${hospital.lat}, ${hospital.lng}]`)
@@ -476,6 +583,182 @@ const updateMarkers = () => {
   })
 
   console.log('updateMarkers complete - total markers:', markers.value.length)
+}
+
+// Check if we have shelters to view from Safety Recommendations page
+function checkForSheltersFromSafety() {
+  const viewSheltersData = localStorage.getItem('viewShelters')
+  if (viewSheltersData) {
+    try {
+      const data = JSON.parse(viewSheltersData)
+      console.log('Viewing shelters from Safety Recommendations:', data)
+      
+      viewingSheltersFromSafety.value = true
+      
+      // Store AI recommended shelter data
+      if (data.aiRecommendedShelter) {
+        aiRecommendedShelterData.value = data.aiRecommendedShelter
+      }
+      
+      // Get user location coordinates
+      const userCity = data.location?.city
+      const userCoords = CARAGA_CITY_COORDINATES[userCity]
+      
+      // Add user location marker
+      if (userCoords) {
+        addUserLocationMarker(userCoords, data.location)
+      }
+      
+      if (data.shelters && data.shelters.length > 0) {
+        highlightedShelters.value = data.shelters
+        
+        // Find shelters with valid coordinates
+        const sheltersWithCoords = data.shelters.filter(s => s.latitude && s.longitude)
+        
+        if (sheltersWithCoords.length > 0) {
+          // Include user location in bounds calculation
+          const allPoints = sheltersWithCoords.map(s => [parseFloat(s.latitude), parseFloat(s.longitude)])
+          if (userCoords) {
+            allPoints.push([userCoords.lat, userCoords.lng])
+          }
+          
+          // Create bounds from all locations
+          const bounds = L.latLngBounds(allPoints)
+          
+          // Fit map to show all markers with padding
+          map.fitBounds(bounds, { padding: [80, 80], maxZoom: 14 })
+          
+          // Add highlighted markers for shelters
+          addHighlightedShelterMarkers(sheltersWithCoords, data.location, data.aiRecommendedShelter)
+        } else if (userCoords) {
+          // No shelter coords, but we have user location - center on user
+          map.setView([userCoords.lat, userCoords.lng], 13)
+        }
+      } else if (userCoords) {
+        // No shelters but have user location
+        map.setView([userCoords.lat, userCoords.lng], 13)
+      }
+      
+      // Clear the localStorage after reading
+      localStorage.removeItem('viewShelters')
+    } catch (error) {
+      console.error('Error parsing viewShelters data:', error)
+      localStorage.removeItem('viewShelters')
+    }
+  }
+}
+
+// Add user's current location marker
+function addUserLocationMarker(coords, location) {
+  const userIcon = L.divIcon({
+    html: `<div class="user-location-marker">
+      <div class="user-pulse-ring"></div>
+      <div class="user-pulse-ring delay"></div>
+      <div class="user-marker-inner">
+        <svg viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="1" style="width: 20px; height: 20px;">
+          <circle cx="12" cy="12" r="4"/>
+        </svg>
+      </div>
+      <div class="user-label">You are here</div>
+    </div>`,
+    className: 'custom-user-location-icon',
+    iconSize: [80, 80],
+    iconAnchor: [40, 40]
+  })
+  
+  const marker = L.marker([coords.lat, coords.lng], { icon: userIcon, zIndexOffset: 2000 }).addTo(map)
+  
+  const barangayText = location.barangay ? `Barangay ${location.barangay}, ` : ''
+  marker.bindPopup(`
+    <div class="popup-content user-location-popup">
+      <div class="popup-header user-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        <h4>Your Location</h4>
+      </div>
+      <p><strong>📍 ${barangayText}${location.city || 'Unknown'}</strong></p>
+      <p>${location.province || 'Caraga Region'}</p>
+      <p class="user-status">AI recommendations generated for this location</p>
+    </div>
+  `, { maxWidth: 280 })
+  
+  userLocationMarker.value = marker
+  markers.value.push(marker)
+}
+
+// Add highlighted shelter markers from Safety Recommendations
+function addHighlightedShelterMarkers(sheltersToHighlight, location, aiRecommended) {
+  sheltersToHighlight.forEach((shelter, index) => {
+    const lat = parseFloat(shelter.latitude)
+    const lng = parseFloat(shelter.longitude)
+    
+    if (isNaN(lat) || isNaN(lng)) return
+    
+    // Check if this shelter is the AI recommended one
+    const isAiRecommended = aiRecommended && shelter.name === aiRecommended.name
+    
+    // Create different icons for AI recommended vs regular shelters
+    const highlightedIcon = L.divIcon({
+      html: `<div class="highlighted-shelter-marker ${isAiRecommended ? 'ai-recommended' : ''}">
+        <div class="pulse-ring ${isAiRecommended ? 'ai-pulse' : ''}"></div>
+        ${isAiRecommended ? '<div class="pulse-ring ai-pulse delay"></div>' : ''}
+        <div class="marker-inner ${isAiRecommended ? 'ai-inner' : ''}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width: 24px; height: 24px;">
+            <path d="M3 12l9-9 9 9v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9,22 9,12 15,12 15,22"/>
+          </svg>
+        </div>
+        <div class="marker-label ${isAiRecommended ? 'ai-label' : ''}">${isAiRecommended ? '★ AI' : index + 1}</div>
+      </div>`,
+      className: `custom-highlighted-shelter-icon ${isAiRecommended ? 'ai-recommended-icon' : ''}`,
+      iconSize: [isAiRecommended ? 70 : 60, isAiRecommended ? 70 : 60],
+      iconAnchor: [isAiRecommended ? 35 : 30, isAiRecommended ? 70 : 60]
+    })
+    
+    const marker = L.marker([lat, lng], { 
+      icon: highlightedIcon, 
+      zIndexOffset: isAiRecommended ? 1500 : 1000 
+    }).addTo(map)
+    
+    // Build popup content
+    let popupContent = `
+      <div class="popup-content highlighted-popup ${isAiRecommended ? 'ai-recommended-popup' : ''}">
+        <div class="popup-header ${isAiRecommended ? 'ai-header' : ''}">
+          ${isAiRecommended ? '<span class="ai-badge-popup">★ AI Recommended</span>' : `<span class="shelter-number">#${index + 1}</span>`}
+          <h4>${shelter.name}</h4>
+        </div>
+        ${isAiRecommended && aiRecommended.reason ? `<p class="ai-reason"><strong>Why:</strong> ${aiRecommended.reason}</p>` : ''}
+        ${isAiRecommended && aiRecommended.safetyScore ? `<p class="safety-score"><strong>Safety Score:</strong> <span class="score-value">${aiRecommended.safetyScore}/100</span></p>` : ''}
+        <p><strong>📍 Address:</strong> ${shelter.address || 'N/A'}</p>
+        <p><strong>👥 Capacity:</strong> ${shelter.capacity || aiRecommended?.capacity || 'N/A'}</p>
+        <p><strong>📏 Distance:</strong> ${shelter.distance || aiRecommended?.distance || 'N/A'}</p>
+        <p><strong>🚶 Walk Time:</strong> ${shelter.walkTime || 'N/A'}</p>
+        <p class="location-from">From: ${location?.city || ''}, ${location?.province || ''}</p>
+      </div>
+    `
+    
+    marker.bindPopup(popupContent, { maxWidth: 320 })
+    
+    // Open popup for the AI recommended shelter, otherwise for the first shelter
+    if (isAiRecommended) {
+      setTimeout(() => marker.openPopup(), 600)
+    } else if (index === 0 && !aiRecommended) {
+      setTimeout(() => marker.openPopup(), 500)
+    }
+    
+    marker.on('click', () => selectPin({
+      ...shelter,
+      type: 'shelter',
+      lat,
+      lng,
+      highlighted: true,
+      isAiRecommended
+    }))
+    
+    markers.value.push(marker)
+  })
 }
 
 // Watch for filter changes and update markers
@@ -615,19 +898,19 @@ watch([filteredZones, filteredShelters, filteredHospitals, filteredPredictions],
         <div class="quick-stats">
           <h3 class="section-title">Quick Stats</h3>
           <div class="stats-list">
-            <div class="stat">
+            <div class="stat stat-shelters">
               <span class="stat-label">Total Shelters</span>
               <span class="stat-value">24</span>
             </div>
-            <div class="stat">
+            <div class="stat stat-capacity">
               <span class="stat-label">Total Capacity</span>
               <span class="stat-value">12,500</span>
             </div>
-            <div class="stat">
+            <div class="stat stat-hospitals">
               <span class="stat-label">Hospitals</span>
               <span class="stat-value">15</span>
             </div>
-            <div class="stat">
+            <div class="stat stat-coverage">
               <span class="stat-label">Coverage Area</span>
               <span class="stat-value">18,847 km²</span>
             </div>
@@ -995,8 +1278,9 @@ watch([filteredZones, filteredShelters, filteredHospitals, filteredPredictions],
   align-items: center;
   text-align: center;
   padding: 1rem;
-  background: #f9f9f9;
+  background: linear-gradient(135deg, #fff5eb 0%, #ffe8d6 100%);
   border-radius: 8px;
+  border-left: 4px solid #FF7A00;
 }
 
 .stat-label {
@@ -1141,6 +1425,94 @@ watch([filteredZones, filteredShelters, filteredHospitals, filteredPredictions],
 .map-canvas :deep(.custom-hospital-icon div:hover),
 .map-canvas :deep(.custom-prediction-icon div:hover) {
   transform: scale(1.2);
+}
+
+/* Custom Labeled Marker Styles */
+.map-canvas :deep(.custom-labeled-icon) {
+  background: none !important;
+  border: none !important;
+}
+
+.map-canvas :deep(.labeled-marker) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.map-canvas :deep(.marker-icon) {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 3px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.map-canvas :deep(.labeled-marker:hover .marker-icon) {
+  transform: scale(1.15);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+}
+
+.map-canvas :deep(.marker-label) {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.map-canvas :deep(.shelter-label) {
+  background: #FF7A00;
+  color: white;
+}
+
+.map-canvas :deep(.hospital-label) {
+  background: #00AA00;
+  color: white;
+}
+
+.map-canvas :deep(.risk-label) {
+  color: white;
+}
+
+/* Zone marker pulse animation */
+.map-canvas :deep(.zone-marker) {
+  position: relative;
+}
+
+.map-canvas :deep(.zone-pulse) {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  opacity: 0.4;
+  animation: pulse-ring 2s infinite;
+  z-index: -1;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
 }
 
 .popup-content {
@@ -1474,5 +1846,297 @@ watch([filteredZones, filteredShelters, filteredHospitals, filteredPredictions],
     font-size: 0.8rem;
     width: 100%;
   }
+}
+
+/* Highlighted Shelter Markers from Safety Recommendations */
+:global(.custom-highlighted-shelter-icon) {
+  background: transparent !important;
+  border: none !important;
+}
+
+:global(.highlighted-shelter-marker) {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:global(.highlighted-shelter-marker .pulse-ring) {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 122, 0, 0.3);
+  animation: pulse-ring 1.5s ease-out infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+:global(.highlighted-shelter-marker .marker-inner) {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #FF7A00, #FF9933);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(255, 122, 0, 0.5);
+  border: 3px solid white;
+}
+
+:global(.highlighted-shelter-marker .marker-inner svg) {
+  transform: rotate(45deg);
+}
+
+:global(.highlighted-shelter-marker .marker-label) {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  background: #FF4444;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Highlighted Popup Styles */
+:global(.highlighted-popup) {
+  min-width: 250px;
+}
+
+:global(.highlighted-popup .popup-header) {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #FF7A00;
+}
+
+:global(.highlighted-popup .shelter-number) {
+  background: #FF7A00;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+:global(.highlighted-popup h4) {
+  margin: 0;
+  color: #333;
+  font-size: 1rem;
+}
+
+:global(.highlighted-popup p) {
+  margin: 0.4rem 0;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+:global(.highlighted-popup .location-from) {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eee;
+  font-style: italic;
+  color: #888;
+  font-size: 0.8rem;
+}
+
+/* User Location Marker Styles */
+:global(.custom-user-location-icon) {
+  background: transparent !important;
+  border: none !important;
+}
+
+:global(.user-location-marker) {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:global(.user-location-marker .user-pulse-ring) {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.3);
+  animation: user-pulse 2s ease-out infinite;
+}
+
+:global(.user-location-marker .user-pulse-ring.delay) {
+  animation-delay: 1s;
+}
+
+@keyframes user-pulse {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+:global(.user-location-marker .user-marker-inner) {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, #3B82F6, #60A5FA);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5);
+  border: 4px solid white;
+  z-index: 10;
+}
+
+:global(.user-location-marker .user-label) {
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #3B82F6;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* User Location Popup */
+:global(.user-location-popup) {
+  min-width: 220px;
+}
+
+:global(.user-location-popup .popup-header.user-header) {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #3B82F6;
+  border-bottom: 2px solid #3B82F6;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+:global(.user-location-popup .user-status) {
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  background: #EFF6FF;
+  border-radius: 6px;
+  color: #1E40AF;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+/* AI Recommended Shelter Styles */
+:global(.highlighted-shelter-marker.ai-recommended) {
+  width: 70px;
+  height: 70px;
+}
+
+:global(.highlighted-shelter-marker .pulse-ring.ai-pulse) {
+  background: rgba(34, 197, 94, 0.3);
+  animation: ai-pulse-ring 1.5s ease-out infinite;
+}
+
+:global(.highlighted-shelter-marker .pulse-ring.ai-pulse.delay) {
+  animation-delay: 0.75s;
+}
+
+@keyframes ai-pulse-ring {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+:global(.highlighted-shelter-marker .marker-inner.ai-inner) {
+  width: 55px;
+  height: 55px;
+  background: linear-gradient(135deg, #22C55E, #4ADE80);
+  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.6);
+}
+
+:global(.highlighted-shelter-marker .marker-label.ai-label) {
+  width: auto;
+  padding: 0 8px;
+  background: linear-gradient(135deg, #22C55E, #16A34A);
+  font-size: 10px;
+  top: -10px;
+  right: -10px;
+}
+
+/* AI Recommended Popup */
+:global(.ai-recommended-popup) {
+  min-width: 280px;
+}
+
+:global(.ai-recommended-popup .popup-header.ai-header) {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  border-bottom: 2px solid #22C55E;
+}
+
+:global(.ai-badge-popup) {
+  background: linear-gradient(135deg, #22C55E, #16A34A);
+  color: white;
+  padding: 0.25rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+:global(.ai-recommended-popup .ai-reason) {
+  background: #F0FDF4;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border-left: 3px solid #22C55E;
+  margin: 0.5rem 0;
+}
+
+:global(.ai-recommended-popup .safety-score) {
+  background: #ECFDF5;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+:global(.ai-recommended-popup .score-value) {
+  color: #22C55E;
+  font-weight: 700;
+  font-size: 1rem;
 }
 </style>
