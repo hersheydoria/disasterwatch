@@ -85,8 +85,9 @@
               ></textarea>
             </div>
 
-            <button v-if="!formSubmitted" type="submit" class="btn btn-primary form-submit">
-              Send Message
+            <button v-if="!formSubmitted" type="submit" class="btn btn-primary form-submit" :disabled="isSubmitting">
+              <span v-if="isSubmitting" class="loading-spinner"></span>
+              {{ isSubmitting ? 'Sending...' : 'Send Message' }}
             </button>
           </form>
         </div>
@@ -206,8 +207,14 @@
 
 <script setup>
 import { ref } from 'vue'
+import emailjs from '@emailjs/browser'
 
 defineEmits(['navigate'])
+
+// EmailJS Configuration - Get these from https://dashboard.emailjs.com
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'your_service_id'
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'your_template_id'
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'your_public_key'
 
 const form = ref({
   fullName: '',
@@ -218,6 +225,7 @@ const form = ref({
 
 const formSubmitted = ref(false)
 const formError = ref('')
+const isSubmitting = ref(false)
 
 const offices = ref([
   { name: 'Butuan Central Office', city: 'Butuan City', phone: '+63-85-225-0000', email: 'butuan@disasterwatch.ph', hours: '8 AM - 5 PM' },
@@ -241,7 +249,7 @@ const faqs = ref([
   { question: 'Is my personal data safe?', answer: 'We follow strict data protection policies. Your information is only used for service improvement.' }
 ])
 
-const submitContactForm = () => {
+const submitContactForm = async () => {
   // Validate form
   if (!form.value.fullName || !form.value.email || !form.value.subject || !form.value.message) {
     formError.value = 'Please fill out all fields'
@@ -255,29 +263,53 @@ const submitContactForm = () => {
     return
   }
 
-  // Success - show submitted data
+  // Set loading state
+  isSubmitting.value = true
   formError.value = ''
-  formSubmitted.value = true
-  
-  // Log submitted data to console
-  console.log('Form submitted with data:', {
-    name: form.value.fullName,
-    email: form.value.email,
-    subject: form.value.subject,
-    message: form.value.message,
-    timestamp: new Date().toLocaleString()
-  })
-  
-  // Reset form after 2 seconds
-  setTimeout(() => {
-    form.value = {
-      fullName: '',
-      email: '',
-      subject: '',
-      message: ''
+
+  try {
+    // Send email using EmailJS
+    const templateParams = {
+      from_name: form.value.fullName,
+      from_email: form.value.email,
+      subject: form.value.subject,
+      message: form.value.message,
+      to_name: 'DisasterWatch Team'
     }
-    formSubmitted.value = false
-  }, 2000)
+
+    await emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_ID,
+      templateParams,
+      EMAILJS_PUBLIC_KEY
+    )
+
+    // Success
+    formSubmitted.value = true
+    console.log('Email sent successfully:', {
+      name: form.value.fullName,
+      email: form.value.email,
+      subject: form.value.subject,
+      timestamp: new Date().toLocaleString()
+    })
+
+    // Reset form after 3 seconds
+    setTimeout(() => {
+      form.value = {
+        fullName: '',
+        email: '',
+        subject: '',
+        message: ''
+      }
+      formSubmitted.value = false
+    }, 3000)
+
+  } catch (error) {
+    console.error('EmailJS Error:', error)
+    formError.value = 'Failed to send message. Please try again or contact us directly.'
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
 // Real-time listeners for form validation
@@ -484,6 +516,30 @@ const onMessageInput = (event) => {
 /* Form Submit Button */
 .form-submit {
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.form-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Contact Info Section */
