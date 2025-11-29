@@ -85,7 +85,27 @@
             <h3>AI Safety Insights</h3>
             <p class="muted">Real-time analysis of AI-driven recommendations and system performance</p>
           </div>
-          <button class="view-logs" @click="viewAllLogs">View All Logs</button>
+          <div class="ai-actions">
+            <button class="generate-btn" @click="generateNewRecommendations" :disabled="loading.ai">
+              <svg v-if="!loading.ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
+              </svg>
+              <span v-if="loading.ai" class="spinner"></span>
+              {{ loading.ai ? 'Generating...' : 'Generate New Recommendations' }}
+            </button>
+            <button class="view-logs" @click="viewAllLogs">View All Logs</button>
+          </div>
+        </div>
+
+        <!-- AI Error Message -->
+        <div v-if="aiError" class="ai-error">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>{{ aiError }}</span>
+          <button @click="aiError = null">×</button>
         </div>
 
         <div class="ai-grid">
@@ -97,8 +117,8 @@
               </svg>
             </div>
             <div>
-              <div class="ai-lead">Agusan City Gym</div>
-              <div class="muted">Agusan del Norte — Most Recommended Shelter</div>
+              <div class="ai-lead">{{ aiInsights.mostRecommendedShelter.name }}</div>
+              <div class="muted">{{ aiInsights.mostRecommendedShelter.region }} — {{ aiInsights.mostRecommendedShelter.reason }}</div>
             </div>
           </div>
 
@@ -110,16 +130,17 @@
               </svg>
             </div>
             <div>
-              <div class="ai-lead">Brgy. Sanghan</div>
-              <div class="muted">Cabadbaran City — Most Affected Area (AI Detected)</div>
+              <div class="ai-lead">{{ aiInsights.mostAffectedArea.name }}</div>
+              <div class="muted">{{ aiInsights.mostAffectedArea.region }} — {{ aiInsights.mostAffectedArea.reason }}</div>
+              <span :class="['risk-badge', aiInsights.mostAffectedArea.riskLevel]">{{ aiInsights.mostAffectedArea.riskLevel?.toUpperCase() }} RISK</span>
             </div>
           </div>
 
           <div class="ai-card">
-            <div class="num-big">84%</div>
+            <div class="num-big">{{ aiInsights.accuracyRate }}%</div>
             <div>
               <div class="ai-lead">Accuracy Rate</div>
-              <div class="bar"><div class="fill" style="width:84%"></div></div>
+              <div class="bar"><div class="fill" :style="{ width: aiInsights.accuracyRate + '%' }"></div></div>
               <div class="muted">AI Suggestions Accuracy</div>
             </div>
           </div>
@@ -133,7 +154,25 @@
             </div>
             <div>
               <div class="ai-lead">Auto-synced</div>
-              <div class="muted">Oct 18, 2025, 10:30 AM</div>
+              <div class="muted">{{ aiInsights.lastSynced }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Recommendations List -->
+        <div v-if="aiInsights.recommendations.length > 0" class="ai-recommendations">
+          <h4>Latest Recommendations</h4>
+          <div class="recommendations-list">
+            <div v-for="(rec, idx) in aiInsights.recommendations.slice(0, 3)" :key="idx" class="rec-item" :class="rec.priority">
+              <div class="rec-header">
+                <span class="rec-shelter">{{ rec.shelter }}</span>
+                <span class="rec-priority" :class="rec.priority">{{ rec.priority?.toUpperCase() }}</span>
+              </div>
+              <p class="rec-text">{{ rec.recommendation }}</p>
+              <div class="rec-footer">
+                <span class="rec-region">{{ rec.region }}</span>
+                <span class="rec-confidence">Confidence: {{ rec.confidence }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -146,6 +185,7 @@
 <script setup>
 import { inject, reactive, onMounted, ref } from 'vue'
 import { getShelters, getAlerts, getRecentEarthquakes } from '../api/client'
+import { generateAIRecommendations } from '../api/groqAI'
 
 const navigate = inject('navigate', () => {})
 
@@ -157,6 +197,11 @@ const stats = reactive({
   activeAlerts: 2,
   totalEvacuees: 340
 })
+
+// Store fetched data for AI analysis
+const sheltersData = ref([])
+const earthquakesData = ref([])
+const alertsData = ref([])
 
 const recentActivities = ref([
   {
@@ -186,37 +231,55 @@ const recentActivities = ref([
   }
 ])
 
-const aiInsights = ref([
-  {
-    shelter: 'Agusan City Gym',
+// AI Insights - now reactive and updated by AI
+const aiInsights = ref({
+  mostRecommendedShelter: {
+    name: 'Agusan City Gym',
     region: 'Agusan del Norte',
-    recommendation: 'High risk area - Increase shelter capacity by 20%',
-    confidence: '94%',
-    priority: 'high'
+    reason: 'Most Recommended Shelter'
   },
-  {
-    shelter: 'Surigao City Convention Center',
-    region: 'Surigao City',
-    recommendation: 'Monitor structural integrity - Next inspection due in 30 days',
-    confidence: '87%',
-    priority: 'medium'
+  mostAffectedArea: {
+    name: 'Brgy. Sanghan',
+    region: 'Cabadbaran City',
+    reason: 'Most Affected Area (AI Detected)',
+    riskLevel: 'medium'
   },
-  {
-    shelter: 'Tandag Multipurpose Center',
-    region: 'Surigao del Sur',
-    recommendation: 'Supply stock adequate for 6 months - Reorder after 120 days',
-    confidence: '92%',
-    priority: 'low'
-  }
-])
+  accuracyRate: 84,
+  lastSynced: 'Oct 18, 2025, 10:30 AM',
+  recommendations: [
+    {
+      shelter: 'Agusan City Gym',
+      region: 'Agusan del Norte',
+      recommendation: 'High risk area - Increase shelter capacity by 20%',
+      confidence: '94%',
+      priority: 'high'
+    },
+    {
+      shelter: 'Surigao City Convention Center',
+      region: 'Surigao City',
+      recommendation: 'Monitor structural integrity - Next inspection due in 30 days',
+      confidence: '87%',
+      priority: 'medium'
+    },
+    {
+      shelter: 'Tandag Multipurpose Center',
+      region: 'Surigao del Sur',
+      recommendation: 'Supply stock adequate for 6 months - Reorder after 120 days',
+      confidence: '92%',
+      priority: 'low'
+    }
+  ]
+})
 
-const loading = reactive({ stats: true })
+const loading = reactive({ stats: true, ai: false })
+const aiError = ref(null)
 
 onMounted(async () => {
   try {
     // Fetch shelters data
     const sheltersResponse = await getShelters(1)
     const shelters = sheltersResponse.results || sheltersResponse
+    sheltersData.value = Array.isArray(shelters) ? shelters : []
 
     stats.totalShelters = sheltersResponse.count || shelters.length || 150
     stats.activeShelters = shelters.filter(s => s.status === 'active' || s.status === 'operational').length || 142
@@ -227,7 +290,17 @@ onMounted(async () => {
     // Fetch alerts data
     const alertsResponse = await getAlerts(1)
     const alerts = alertsResponse.results || alertsResponse || []
+    alertsData.value = Array.isArray(alerts) ? alerts : []
     stats.activeAlerts = alerts.filter(a => a.status === 'active').length || 2
+
+    // Fetch earthquakes data
+    try {
+      const eqResponse = await getRecentEarthquakes()
+      earthquakesData.value = Array.isArray(eqResponse) ? eqResponse : eqResponse.results || []
+    } catch (eqError) {
+      console.warn('Could not fetch earthquake data:', eqError)
+      earthquakesData.value = []
+    }
 
     loading.stats = false
   } catch (error) {
@@ -235,6 +308,70 @@ onMounted(async () => {
     loading.stats = false
   }
 })
+
+async function generateNewRecommendations() {
+  loading.ai = true
+  aiError.value = null
+  
+  try {
+    const result = await generateAIRecommendations({
+      shelters: sheltersData.value,
+      earthquakes: earthquakesData.value,
+      alerts: alertsData.value,
+      stats: { ...stats }
+    })
+
+    // Update AI insights with the response
+    if (result.mostRecommendedShelter) {
+      aiInsights.value.mostRecommendedShelter = {
+        name: result.mostRecommendedShelter.name,
+        region: result.mostRecommendedShelter.region,
+        reason: result.mostRecommendedShelter.reason || 'Most Recommended Shelter'
+      }
+    }
+
+    if (result.mostAffectedArea) {
+      aiInsights.value.mostAffectedArea = {
+        name: result.mostAffectedArea.name,
+        region: result.mostAffectedArea.region || 'Caraga Region',
+        reason: result.mostAffectedArea.reason || 'AI Detected Risk Area',
+        riskLevel: result.mostAffectedArea.riskLevel || 'medium'
+      }
+    }
+
+    if (result.accuracyRate) {
+      aiInsights.value.accuracyRate = result.accuracyRate
+    }
+
+    if (result.recommendations && result.recommendations.length > 0) {
+      aiInsights.value.recommendations = result.recommendations
+    }
+
+    // Update last synced time
+    aiInsights.value.lastSynced = new Date().toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    })
+
+    // Add to recent activities
+    recentActivities.value.unshift({
+      title: 'AI Analysis',
+      description: result.summary || 'New AI recommendations generated successfully',
+      time: 'Just now'
+    })
+
+    console.log('AI Recommendations generated:', result)
+  } catch (error) {
+    console.error('Error generating AI recommendations:', error)
+    aiError.value = error.message || 'Failed to generate recommendations'
+  } finally {
+    loading.ai = false
+  }
+}
 
 function addNewShelter() {
   console.log('Adding new shelter...')
@@ -259,7 +396,8 @@ function viewAlerts() {
 }
 
 function viewAllLogs() {
-  console.log('View All Logs clicked - Total AI insights:', aiInsights.value.length)
+  console.log('View All Logs clicked - Total AI insights:', aiInsights.value.recommendations.length)
+  navigate('reports')
 }
 </script>
 
@@ -446,6 +584,54 @@ function viewAllLogs() {
   color: #7a7f84;
 }
 
+.ai-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.generate-btn {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.generate-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.generate-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.generate-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .view-logs {
   padding: 0.5rem 1rem;
   background: #ff6b1a;
@@ -460,6 +646,65 @@ function viewAllLogs() {
 
 .view-logs:hover {
   background: #e55a0a;
+}
+
+/* AI Error */
+.ai-error {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  color: #dc2626;
+  font-size: 13px;
+}
+
+.ai-error svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.ai-error span {
+  flex: 1;
+}
+
+.ai-error button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #dc2626;
+  padding: 0;
+  line-height: 1;
+}
+
+/* Risk Badge */
+.risk-badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.risk-badge.high {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.risk-badge.medium {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.risk-badge.low {
+  background: #f0fdf4;
+  color: #16a34a;
 }
 
 /* AI Grid */
@@ -546,5 +791,107 @@ function viewAllLogs() {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .panels { grid-template-columns: 1fr; }
   .ai-grid { grid-template-columns: 1fr; }
+  .ai-header { flex-direction: column; gap: 1rem; }
+  .ai-actions { width: 100%; }
+  .generate-btn, .view-logs { flex: 1; justify-content: center; }
+}
+
+/* AI Recommendations List */
+.ai-recommendations {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.ai-recommendations h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+  margin: 0 0 1rem 0;
+}
+
+.recommendations-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.rec-item {
+  padding: 1rem;
+  background: #f9f9f9;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  border-left: 3px solid #999;
+}
+
+.rec-item.high {
+  border-left-color: #ef4444;
+  background: #fef2f2;
+}
+
+.rec-item.medium {
+  border-left-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.rec-item.low {
+  border-left-color: #22c55e;
+  background: #f0fdf4;
+}
+
+.rec-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.rec-shelter {
+  font-size: 13px;
+  font-weight: 600;
+  color: #222;
+}
+
+.rec-priority {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.rec-priority.high {
+  background: #fecaca;
+  color: #dc2626;
+}
+
+.rec-priority.medium {
+  background: #fde68a;
+  color: #d97706;
+}
+
+.rec-priority.low {
+  background: #bbf7d0;
+  color: #16a34a;
+}
+
+.rec-text {
+  font-size: 12px;
+  color: #555;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.5;
+}
+
+.rec-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #7a7f84;
+}
+
+@media (max-width: 1200px) {
+  .recommendations-list {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
