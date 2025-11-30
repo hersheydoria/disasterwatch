@@ -20,7 +20,7 @@
         <div class="panel activities">
           <div class="panel-head">
             <span>Recent Activities</span>
-            <a class="view-all">View All</a>
+            <a class="view-all" href="#" @click.prevent="viewRecentActivities">View All</a>
           </div>
           <ul>
             <li v-for="(activity, idx) in recentActivities" :key="idx">
@@ -183,25 +183,32 @@
 </template>
 
 <script setup>
-import { inject, reactive, onMounted, ref } from 'vue'
-import { getShelters, getAlerts, getRecentEarthquakes } from '../api/client'
+import { inject, reactive, ref, watch, onMounted } from 'vue'
+import { shelters } from '../stores/shelterStore'
 import { generateAIRecommendations } from '../api/groqAI'
 
 const navigate = inject('navigate', () => {})
 
 const stats = reactive({
-  totalShelters: 150,
-  activeShelters: 142,
-  fullCapacityShelters: 3,
-  maintenanceShelters: 5,
-  activeAlerts: 2,
-  totalEvacuees: 340
+  totalShelters: 0,
+  activeShelters: 0,
+  fullCapacityShelters: 0,
+  maintenanceShelters: 0,
+  activeAlerts: 0,
+  totalEvacuees: 0
 })
 
-// Store fetched data for AI analysis
-const sheltersData = ref([])
-const earthquakesData = ref([])
-const alertsData = ref([])
+const sheltersData = shelters
+const alertsData = ref([
+  { id: 1, location: 'Butuan City', magnitude: 4.6, depth: '12 km', status: 'active', time: '5 mins ago' },
+  { id: 2, location: 'Surigao Strait', magnitude: 3.9, depth: '28 km', status: 'monitor', time: '1 hour ago' },
+  { id: 3, location: 'Davao Oriental Coast', magnitude: 4.1, depth: '16 km', status: 'active', time: '3 hours ago' }
+])
+const earthquakesData = ref([
+  { id: 1, magnitude: 4.2, depth: '12 km', location: 'Agusan del Norte', time: 'Today, 08:15 AM' },
+  { id: 2, magnitude: 3.8, depth: '20 km', location: 'Surigao City', time: 'Today, 06:40 AM' },
+  { id: 3, magnitude: 4.5, depth: '10 km', location: 'Tandag City', time: 'Yesterday, 11:21 PM' }
+])
 
 const recentActivities = ref([
   {
@@ -231,7 +238,6 @@ const recentActivities = ref([
   }
 ])
 
-// AI Insights - now reactive and updated by AI
 const aiInsights = ref({
   mostRecommendedShelter: {
     name: 'Agusan City Gym',
@@ -274,39 +280,36 @@ const aiInsights = ref({
 const loading = reactive({ stats: true, ai: false })
 const aiError = ref(null)
 
-onMounted(async () => {
-  try {
-    // Fetch shelters data
-    const sheltersResponse = await getShelters(1)
-    const shelters = sheltersResponse.results || sheltersResponse
-    sheltersData.value = Array.isArray(shelters) ? shelters : []
-
-    stats.totalShelters = sheltersResponse.count || shelters.length || 150
-    stats.activeShelters = shelters.filter(s => s.status === 'active' || s.status === 'operational').length || 142
-    stats.fullCapacityShelters = shelters.filter(s => s.status === 'full').length || 3
-    stats.maintenanceShelters = shelters.filter(s => s.status === 'maintenance').length || 5
-    stats.totalEvacuees = shelters.reduce((sum, s) => sum + (s.current_occupancy || 0), 0) || 340
-
-    // Fetch alerts data
-    const alertsResponse = await getAlerts(1)
-    const alerts = alertsResponse.results || alertsResponse || []
-    alertsData.value = Array.isArray(alerts) ? alerts : []
-    stats.activeAlerts = alerts.filter(a => a.status === 'active').length || 2
-
-    // Fetch earthquakes data
-    try {
-      const eqResponse = await getRecentEarthquakes()
-      earthquakesData.value = Array.isArray(eqResponse) ? eqResponse : eqResponse.results || []
-    } catch (eqError) {
-      console.warn('Could not fetch earthquake data:', eqError)
-      earthquakesData.value = []
+watch(
+  sheltersData,
+  (newShelters, oldShelters) => {
+    updateStats(newShelters)
+    if (oldShelters && newShelters.length > oldShelters.length) {
+      const latest = newShelters[0]
+      recentActivities.value.unshift({
+        title: 'Shelter Added',
+        description: `${latest.name} has been registered`,
+        time: 'Just now'
+      })
+      if (recentActivities.value.length > 6) {
+        recentActivities.value.pop()
+      }
     }
+  },
+  { immediate: true }
+)
 
-    loading.stats = false
-  } catch (error) {
-    console.error('Error fetching dashboard data:', error)
-    loading.stats = false
-  }
+function updateStats(items = []) {
+  stats.totalShelters = items.length
+  stats.activeShelters = items.filter((s) => s.status === 'active').length
+  stats.fullCapacityShelters = items.filter((s) => s.status === 'full').length
+  stats.maintenanceShelters = items.filter((s) => ['maintenance', 'inactive'].includes(s.status)).length
+  stats.totalEvacuees = items.reduce((sum, s) => sum + (s.current_occupancy || 0), 0)
+  stats.activeAlerts = alertsData.value.filter((a) => a.status === 'active').length
+}
+
+onMounted(() => {
+  loading.stats = false
 })
 
 async function generateNewRecommendations() {
@@ -397,6 +400,11 @@ function viewAlerts() {
 
 function viewAllLogs() {
   console.log('View All Logs clicked - Total AI insights:', aiInsights.value.recommendations.length)
+  navigate('reports')
+}
+
+function viewRecentActivities() {
+  console.log('Viewing recent activity log...')
   navigate('reports')
 }
 </script>

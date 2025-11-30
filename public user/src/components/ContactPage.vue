@@ -8,7 +8,7 @@
 
     <!-- Main Contact Content -->
     <section class="contact-main">
-      <div class="contact-wrapper">
+      <div class="contact-grid">
         <!-- Contact Form -->
         <div class="contact-form-section">
           <div class="form-header">
@@ -170,37 +170,6 @@
         <p class="map-description">DisasterWatch serves the entire Caraga Region, providing real-time monitoring and emergency resources to protect our communities.</p>
       </div>
     </section>
-
-    <!-- Emergency Alert Section -->
-    <section class="emergency-section">
-      <div class="emergency-content">
-        <div class="emergency-header">
-          <span class="emergency-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-              <line x1="12" y1="9" x2="12" y2="13"/>
-              <line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-          </span>
-          <h2>Emergency Alert</h2>
-        </div>
-        <p>In case of immediate earthquake emergency, reach the local CDRRMO hotline immediately</p>
-        <div class="emergency-buttons">
-          <button class="btn btn-emergency">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline-icon">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-            </svg>
-            Call 911
-          </button>
-          <button class="btn btn-secondary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline-icon">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-            </svg>
-            Emergency Hotline
-          </button>
-        </div>
-      </div>
-    </section>
   </div>
 </template>
 
@@ -323,8 +292,8 @@ const onMessageInput = (event) => {
   background: linear-gradient(135deg, #FF7A00 0%, #FF9933 100%);
   color: white;
   text-align: center;
-  padding: 3rem 2rem;
-  min-height: 180px;
+  padding: 2.2rem 1.5rem;
+  min-height: 140px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -347,25 +316,24 @@ const onMessageInput = (event) => {
 
 /* Contact Main Section */
 .contact-main {
-  padding: 3rem 2rem;
+  padding: 2.5rem 1.5rem;
   background: white;
 }
 
-.contact-wrapper {
-  max-width: 1200px;
-  margin: 0 auto;
+.contact-grid {
+  max-width: 1100px;
+  margin: 0 auto 2rem;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
-  margin-bottom: 3rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
 }
 
 /* Contact Form Section */
 .contact-form-section {
   background: white;
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
 }
 
 .form-header h2 {
@@ -490,7 +458,7 @@ const onMessageInput = (event) => {
 .contact-info-section {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .info-header h2 {
@@ -503,8 +471,8 @@ const onMessageInput = (event) => {
 /* Contact Info Cards */
 .contact-info-cards {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.2rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
 }
 
 .info-card {
@@ -557,9 +525,9 @@ const onMessageInput = (event) => {
 
 /* Location Section */
 .location-section {
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
 }
 
 .map-container {
@@ -617,62 +585,11 @@ const onMessageInput = (event) => {
   margin: 0;
 }
 
-/* Emergency Section */
-.emergency-section {
-  background: linear-gradient(135deg, #E63946 0%, #F1144C 100%);
-  padding: 2.5rem 2rem;
-  margin-top: 2rem;
-}
-
-.emergency-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  text-align: center;
-  color: white;
-}
-
-.emergency-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.emergency-icon {
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-
 .inline-icon {
   width: 1rem;
   height: 1rem;
   margin-right: 0.5rem;
   flex-shrink: 0;
-}
-
-.emergency-header h2 {
-  font-size: 1.6rem;
-  margin: 0;
-  font-weight: 700;
-}
-
-.emergency-content p {
-  font-size: 1rem;
-  margin: 0 0 1.5rem 0;
-  line-height: 1.6;
-  opacity: 0.95;
-}
-
-.emergency-buttons {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
 }
 
 /* Buttons */
@@ -799,19 +716,6 @@ const onMessageInput = (event) => {
     height: 250px;
     margin-bottom: 1rem;
   }
-
-  .emergency-section {
-    padding: 2rem 1.5rem;
-    margin-top: 1.5rem;
-  }
-
-  .emergency-header h2 {
-    font-size: 1.3rem;
-  }
-
-  .emergency-buttons {
-    gap: 0.8rem;
-  }
 }
 
 @media (max-width: 480px) {
@@ -896,35 +800,7 @@ const onMessageInput = (event) => {
   .map-description {
     font-size: 0.9rem;
   }
-
-  .emergency-section {
-    padding: 1.5rem 1rem;
-    margin-top: 1rem;
-  }
-
-  .emergency-header {
-    gap: 0.8rem;
-    margin-bottom: 0.8rem;
-  }
-
-  .emergency-icon {
-    font-size: 1.5rem;
-  }
-
-  .emergency-header h2 {
-    font-size: 1.2rem;
-  }
-
-  .emergency-content p {
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-  }
-
-  .emergency-buttons {
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-
+  
   .btn {
     width: 100%;
     padding: 0.8rem 1rem;

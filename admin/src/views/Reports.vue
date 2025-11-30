@@ -144,6 +144,80 @@
         </div>
       </div>
     </section>
+
+        <div v-if="showReportModal" class="modal-backdrop">
+          <div class="modal-card">
+            <header>
+              <div>
+                <h4>Report Details</h4>
+                <p>Displaying information for #RPT-{{ selectedReport ? String(selectedReport.id).padStart(4, '0') : '0000' }}</p>
+              </div>
+              <button class="close-btn" @click="closeReportModal">×</button>
+            </header>
+            <div class="modal-body">
+              <div class="modal-detail-row">
+                <span class="label">Shelter</span>
+                <span class="value">{{ selectedReport?.shelter_name }}</span>
+              </div>
+              <div class="modal-detail-row">
+                <span class="label">Type</span>
+                <span class="value" :class="['badge', selectedReport?.status]">{{ selectedReport?.status }}</span>
+              </div>
+              <div class="modal-detail-row">
+                <span class="label">Description</span>
+                <span class="value">{{ selectedReport?.description }}</span>
+              </div>
+              <div class="modal-detail-row">
+                <span class="label">Date & Time</span>
+                <span class="value">{{ selectedReport ? new Date(selectedReport.created_at).toLocaleString() : '' }}</span>
+              </div>
+              <div class="modal-detail-row">
+                <span class="label">Updated By</span>
+                <span class="value">{{ selectedReport?.created_by }}</span>
+              </div>
+            </div>
+            <div class="modal-actions">
+              <button class="btn-cancel" @click="closeReportModal">Close</button>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="showLogModal" class="modal-backdrop">
+          <div class="modal-card">
+            <header>
+              <div>
+                <h4>Recommendation Log</h4>
+                <p>{{ selectedLog?.recommendation_type }} · {{ selectedLog?.shelter_name }}</p>
+              </div>
+              <button class="close-btn" @click="closeLogModal">×</button>
+            </header>
+            <div class="modal-body">
+              <div class="modal-detail-row">
+                <span class="label">Timestamp</span>
+                <span class="value">{{ selectedLog ? new Date(selectedLog.created_at).toLocaleString() : '' }}</span>
+              </div>
+              <div class="modal-detail-row">
+                <span class="label">User</span>
+                <span class="value">{{ selectedLog?.user_name }}</span>
+              </div>
+              <div class="modal-detail-row">
+                <span class="label">Status</span>
+                <span class="value status-badge" :class="getStatusBadgeClass(selectedLog?.status)">{{ selectedLog ? (selectedLog.status === 'high' ? 'High Risk' : selectedLog.status === 'medium' ? 'Medium Risk' : 'Low Risk') : '' }}</span>
+              </div>
+              <div class="modal-detail-row">
+                <span class="label">Risk Level</span>
+                <span class="value" :class="selectedLog?.risk_level ? 'risk-' + selectedLog.risk_level.toLowerCase() : ''">{{ selectedLog?.risk_level }}</span>
+              </div>
+              <div class="modal-detail-row">
+                <span class="label">Outcome</span>
+                <span class="value outcome" :class="getOutcomeClass(selectedLog?.outcome)">{{ selectedLog?.outcome?.toUpperCase() }}</span>
+              </div>
+            </div>
+            <div class="modal-actions">
+              <button class="btn-cancel" @click="closeLogModal">Close</button>
+            </div>
+          </div>
+        </div>
   </div>
 </template>
 
@@ -170,6 +244,10 @@ const currentPage = ref(1)
 const filterDate = ref('Last 7 days')
 const searchQuery = ref('')
 const loading = ref(false)
+const showReportModal = ref(false)
+const showLogModal = ref(false)
+const selectedReport = ref(null)
+const selectedLog = ref(null)
 
 const filteredReports = computed(() => {
   let filtered = reports.value
@@ -215,6 +293,7 @@ function exportCSV() {
   a.download = `reports-${Date.now()}.csv`
   a.click()
   console.log('Exported', filteredReports.value.length, 'reports to CSV')
+  alert(`Exported ${filteredReports.value.length} reports to CSV.`)
 }
 
 function exportPDF() {
@@ -229,7 +308,11 @@ function handleSearchInput(event) {
 
 function viewReportDetails(reportId) {
   console.log(`Viewing details for report: ${reportId}`)
-  // Report details modal - can be expanded later
+  const report = reports.value.find(r => r.id === reportId)
+  if (report) {
+    selectedReport.value = report
+    showReportModal.value = true
+  }
 }
 
 function handlePagination(page) {
@@ -260,10 +343,26 @@ function exportLogs() {
   a.href = url
   a.download = `recommendations-${Date.now()}.csv`
   a.click()
+  alert('AI recommendation logs exported to CSV.')
 }
 
 function viewLogDetails(logId) {
   console.log(`Viewing details for log: ${logId}`)
+  const log = recommendations.value.find(r => r.id === logId)
+  if (log) {
+    selectedLog.value = log
+    showLogModal.value = true
+  }
+}
+
+function closeReportModal() {
+  showReportModal.value = false
+  selectedReport.value = null
+}
+
+function closeLogModal() {
+  showLogModal.value = false
+  selectedLog.value = null
 }
 
 async function loadReports() {
@@ -748,6 +847,96 @@ onMounted(async () => {
   margin-top: 1.5rem;
   padding-top: 1.5rem;
   border-top: 1px solid #f0f0f0;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 40;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 480px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 25px 45px rgba(15, 23, 42, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal-card header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.modal-card h4 {
+  margin: 0;
+  font-size: 18px;
+  color: #111;
+}
+
+.modal-card p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #475569;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.modal-detail-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 13px;
+}
+
+.modal-detail-row .label {
+  font-weight: 600;
+  color: #475569;
+}
+
+.modal-detail-row .value {
+  max-width: 60%;
+  text-align: right;
+  color: #0f172a;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-cancel {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #0f172a;
+  padding: 0.6rem 1.2rem;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: #475569;
+  cursor: pointer;
 }
 
 @media (max-width: 1200px) {

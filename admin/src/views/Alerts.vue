@@ -123,71 +123,45 @@
             </div>
           </div>
         </section>
+        <div v-if="actionModal.visible" class="action-modal-backdrop">
+          <div class="action-modal-card">
+            <header>
+              <div>
+                <h4>{{ actionModal.title }}</h4>
+                <p>{{ actionModal.message }}</p>
+              </div>
+              <button class="close-btn" @click="closeActionModal">×</button>
+            </header>
+            <div class="modal-actions">
+              <button v-if="actionModal.showCancel" class="btn-cancel" type="button" @click="closeActionModal">Cancel</button>
+              <button class="btn-confirm" type="button" :disabled="actionModal.loading" @click="actionModal.onConfirm && actionModal.onConfirm()">
+                {{ actionModal.loading ? 'Working...' : actionModal.confirmLabel }}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { getAlerts, acknowledgeAlert } from '../api/client'
-
-const alerts = ref([
-  {
-    id: 1,
-    location: 'Butuan City, Agusan del Norte',
-    alert_type: 'Mainshock',
-    magnitude: 4.5,
-    depth: 12,
-    timestamp: new Date(Date.now() - 2*60*60*1000).toISOString(),
-    status: 'active'
-  },
-  {
-    id: 2,
-    location: 'Surigao City, Surigao del Norte',
-    alert_type: 'Mainshock',
-    magnitude: 3.8,
-    depth: 15,
-    timestamp: new Date(Date.now() - 5*60*60*1000).toISOString(),
-    status: 'acknowledged'
-  },
-  {
-    id: 3,
-    location: 'Tandag, Surigao del Sur',
-    alert_type: 'Mainshock',
-    magnitude: 5.2,
-    depth: 18,
-    timestamp: new Date(Date.now() - 24*60*60*1000).toISOString(),
-    status: 'resolved'
-  },
-  {
-    id: 4,
-    location: 'Butuan City, Agusan del Norte',
-    alert_type: 'Aftershock',
-    magnitude: 3.2,
-    depth: 10,
-    timestamp: new Date(Date.now() - 3*60*60*1000).toISOString(),
-    status: 'active'
-  },
-  {
-    id: 5,
-    location: 'Bislig, Surigao del Sur',
-    alert_type: 'Aftershock',
-    magnitude: 2.9,
-    depth: 14,
-    timestamp: new Date(Date.now() - 2*24*60*60*1000).toISOString(),
-    status: 'resolved'
-  }
-])
+import { ref, computed } from 'vue'
+import {
+  alerts as alertStore,
+  refreshAlerts as refreshAlertStore,
+  acknowledgeAlert as acknowledgeAlertStore
+} from '../stores/alertStore'
 
 const searchQuery = ref('')
 const magnitudeFilter = ref('')
 const statusFilter = ref('')
 const currentPage = ref(1)
 const loading = ref(false)
+const actionModal = ref({ visible: false, title: '', message: '', confirmLabel: 'Close', showCancel: true, loading: false, onConfirm: null })
 
 const filteredAlerts = computed(() => {
-  let filtered = alerts.value
+  let filtered = alertStore.value
 
   if (searchQuery.value) {
     filtered = filtered.filter(alert => 
@@ -214,10 +188,10 @@ const filteredAlerts = computed(() => {
 })
 
 const stats = computed(() => ({
-  total: alerts.value.length,
-  major: alerts.value.filter(a => a.magnitude >= 6).length,
-  aftershocks: alerts.value.filter(a => a.alert_type === 'Aftershock').length,
-  active: alerts.value.filter(a => a.status === 'active').length
+  total: alertStore.value.length,
+  major: alertStore.value.filter(a => a.magnitude >= 6).length,
+  aftershocks: alertStore.value.filter(a => a.alert_type === 'Aftershock').length,
+  active: alertStore.value.filter(a => a.status === 'active').length
 }))
 
 function handleSearch(event) {
@@ -236,39 +210,72 @@ function handleStatusFilter() {
   console.log('Filter: Status', statusFilter.value, '- Showing', count, 'results')
 }
 
-async function handleAcknowledgeAlert(alertId) {
-  try {
-    const alert = alerts.value.find(a => a.id === alertId)
-    if (alert) {
-      alert.status = 'acknowledged'
-    }
+function handleAcknowledgeAlert(alertId) {
+  const updated = acknowledgeAlertStore(alertId)
+  if (updated) {
+    openActionModal({
+      title: 'Alert Acknowledged',
+      message: `Alert for ${updated.location} marked as acknowledged.`,
+      confirmLabel: 'Okay',
+      showCancel: false,
+      onConfirm: closeActionModal
+    })
     console.log('Alert acknowledged:', alertId)
-  } catch (error) {
-    console.error('Error acknowledging alert:', error)
   }
 }
 
 function viewAlertDetails(alertId) {
+  const selected = alertStore.value.find((a) => a.id === alertId)
+  openActionModal({
+    title: 'Alert Details',
+    message: `Details for ${selected?.location || 'this event'}:\nMagnitude ${selected?.magnitude?.toFixed(1)}\nDepth ${selected?.depth} km`,
+    confirmLabel: 'Close',
+    showCancel: false,
+    onConfirm: closeActionModal
+  })
   console.log('Viewing details for earthquake:', alertId)
 }
 
-async function refreshAlerts() {
-  await loadAlerts()
+function openActionModal(options) {
+  actionModal.value = {
+    visible: true,
+    title: options.title,
+    message: options.message,
+    confirmLabel: options.confirmLabel || 'Ok',
+    showCancel: options.showCancel ?? true,
+    loading: options.loading || false,
+    onConfirm: options.onConfirm || closeActionModal
+  }
 }
 
-async function loadAlerts() {
-  loading.value = true
-  try {
-    const response = await getAlerts(1)
-    const newAlerts = Array.isArray(response) ? response : response.results || []
-    if (newAlerts.length > 0) {
-      alerts.value = newAlerts
+function closeActionModal() {
+  actionModal.value = { visible: false, title: '', message: '', confirmLabel: 'Close', showCancel: true, loading: false, onConfirm: null }
+}
+
+async function refreshAlerts() {
+  openActionModal({
+    title: 'Refresh Alerts',
+    message: 'Fetch the latest seismic observations and update the dashboard.',
+    confirmLabel: 'Refresh Now',
+    showCancel: true,
+    onConfirm: confirmRefreshAlerts
+  })
+}
+
+function confirmRefreshAlerts() {
+  actionModal.value.loading = true
+  setTimeout(() => {
+    refreshAlertStore()
+    actionModal.value = {
+      visible: true,
+      title: 'Alerts Refreshed',
+      message: 'Earthquake observations have been updated.',
+      confirmLabel: 'Close',
+      showCancel: false,
+      loading: false,
+      onConfirm: closeActionModal
     }
-  } catch (error) {
-    console.error('Error loading alerts:', error)
-  } finally {
-    loading.value = false
-  }
+  }, 600)
 }
 
 function prevPage() {
@@ -297,10 +304,6 @@ function getSeverityClass(magnitude) {
   if (magnitude >= 4) return 'medium'
   return 'low'
 }
-
-onMounted(async () => {
-  await loadAlerts()
-})
 </script>
 
 <style scoped>
@@ -684,4 +687,14 @@ onMounted(async () => {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+.action-modal-backdrop{ position:fixed; inset:0; background:rgba(15,23,42,0.45); display:flex; align-items:center; justify-content:center; z-index:40; padding:16px }
+.action-modal-card{ width:100%; max-width:420px; background:#fff; border-radius:18px; padding:20px; box-shadow:0 25px 45px rgba(15,23,42,0.25); display:flex; flex-direction:column; gap:12px }
+.action-modal-card header{ display:flex; justify-content:space-between; align-items:flex-start }
+.action-modal-card h4{ margin:0; font-size:18px }
+.action-modal-card p{ margin:6px 0 0; color:#475569; font-size:13px }
+.modal-actions{ display:flex; justify-content:flex-end; gap:10px }
+.btn-cancel{ background:#fff; border:1px solid #e6e9ec; border-radius:8px; padding:8px 14px; cursor:pointer }
+.btn-confirm{ background:#ff6b1a; border:none; border-radius:8px; color:#fff; padding:8px 14px; font-weight:600; cursor:pointer }
+.close-btn{ background:transparent; border:none; font-size:18px; line-height:1; cursor:pointer; color:#475569 }
 </style>

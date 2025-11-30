@@ -5,7 +5,7 @@
         <h2>Evacuation Shelters</h2>
         <p class="desc">Manage evacuation areas and shelter information</p>
       </div>
-      <button class="btn-refresh">
+      <button class="btn-refresh" type="button" @click="refreshShelterList">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline-icon">
           <polyline points="23 4 23 10 17 10"/>
           <polyline points="1 20 1 14 7 14"/>
@@ -60,7 +60,7 @@
                 @input="onLongitudeInput"
               />
             </label>
-            <button type="button" class="map-btn">
+            <button type="button" class="map-btn" @click="openMapPicker">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                 <circle cx="12" cy="10" r="3"/>
@@ -136,13 +136,29 @@
         </form>
       </div>
     </div>
+
+    <div v-if="mapPickerVisible" class="map-picker-overlay">
+      <div class="map-picker-panel">
+        <header>
+          <h4>Pick Location on Map</h4>
+          <p>Select the location to auto-fill the coordinates.</p>
+        </header>
+        <div id="shelter-map" class="shelter-map"></div>
+        <p v-if="selectedCoordinates" class="map-coords">Latitude: {{ selectedCoordinates.lat.toFixed(6) }}, Longitude: {{ selectedCoordinates.lng.toFixed(6) }}</p>
+        <div class="map-picker-footer">
+          <button type="button" class="btn-cancel" @click="closeMapPicker">Cancel</button>
+          <button type="button" class="btn-save" :disabled="!selectedCoordinates" @click="confirmMapSelection">Use Coordinates</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, inject } from 'vue'
-
-const emit = defineEmits(['cancel'])
+import { ref, reactive, inject, nextTick } from 'vue'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import { addShelter, resetShelters } from '../stores/shelterStore'
 const navigate = inject('navigate', () => {})
 
 const form = reactive({
@@ -158,25 +174,45 @@ const form = reactive({
 })
 
 const submittedData = ref(null)
+const mapPickerVisible = ref(false)
+const selectedCoordinates = ref(null)
+const mapInstance = ref(null)
+const mapMarker = ref(null)
 
 function submit() {
-  // Validate form
   if (!form.name || !form.address || !form.capacity || !form.status) {
     alert('Please fill out required fields')
     return
   }
 
-  // Store submitted data
-  submittedData.value = { ...form }
-  
-  // Log to console
+  const payload = {
+    name: form.name.trim(),
+    address: form.address.trim(),
+    capacity: Number(form.capacity),
+    status: form.status,
+    contact_person: form.contact_person.trim(),
+    contact_number: form.contact_number.trim(),
+    latitude: form.latitude,
+    longitude: form.longitude,
+    notes: form.notes.trim()
+  }
+
+  submittedData.value = { ...payload }
+  addShelter({
+    ...payload,
+    current_occupancy: 0,
+    shelter_type: 'Multipurpose Center',
+    region: 'Caraga Region'
+  })
+
   console.log('Submitting shelter:', submittedData.value)
   alert(`Shelter "${form.name}" saved successfully!\nCapacity: ${form.capacity}\nLocation: ${form.address}`)
-  
-  // Reset form and navigate
-  Object.keys(form).forEach(key => {
+
+  Object.keys(form).forEach((key) => {
     form[key] = ''
   })
+  selectedCoordinates.value = null
+  hideMapPicker()
   navigate('shelters')
 }
 
@@ -184,48 +220,99 @@ function cancel() {
   navigate('shelters')
 }
 
-// Real-time input listeners
-const onShelterNameInput = (event) => {
+function refreshShelterList() {
+  resetShelters()
+  navigate('shelters')
+  alert('Shelter list refreshed and default data restored.')
+}
+
+async function openMapPicker() {
+  mapPickerVisible.value = true
+  await nextTick()
+
+  if (!mapInstance.value) {
+    mapInstance.value = L.map('shelter-map', {
+      center: [8.953444, 125.525],
+      zoom: 8,
+      zoomControl: true
+    })
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(mapInstance.value)
+
+    mapInstance.value.on('click', handleMapClick)
+  } else {
+    mapInstance.value.invalidateSize()
+    if (selectedCoordinates.value) {
+      mapInstance.value.setView([selectedCoordinates.value.lat, selectedCoordinates.value.lng], 12)
+    }
+  }
+}
+
+function handleMapClick(event) {
+  const { lat, lng } = event.latlng
+  selectedCoordinates.value = { lat, lng }
+  form.latitude = lat.toFixed(6)
+  form.longitude = lng.toFixed(6)
+
+  if (mapMarker.value) {
+    mapMarker.value.setLatLng([lat, lng])
+  } else if (mapInstance.value) {
+    mapMarker.value = L.marker([lat, lng]).addTo(mapInstance.value)
+  }
+}
+
+function confirmMapSelection() {
+  if (!selectedCoordinates.value) return
+  hideMapPicker()
+}
+
+function hideMapPicker() {
+  mapPickerVisible.value = false
+}
+
+function onShelterNameInput(event) {
   form.name = event.target.value
   console.log('Shelter name:', form.name)
 }
 
-const onAddressInput = (event) => {
+function onAddressInput(event) {
   form.address = event.target.value
   console.log('Address:', form.address)
 }
 
-const onLatitudeInput = (event) => {
+function onLatitudeInput(event) {
   form.latitude = event.target.value
   console.log('Latitude:', form.latitude)
 }
 
-const onLongitudeInput = (event) => {
+function onLongitudeInput(event) {
   form.longitude = event.target.value
   console.log('Longitude:', form.longitude)
 }
 
-const onCapacityInput = (event) => {
+function onCapacityInput(event) {
   form.capacity = event.target.value
   console.log('Capacity:', form.capacity)
 }
 
-const onStatusChange = (event) => {
+function onStatusChange(event) {
   form.status = event.target.value
   console.log('Status changed to:', form.status)
 }
 
-const onContactPersonInput = (event) => {
+function onContactPersonInput(event) {
   form.contact_person = event.target.value
   console.log('Contact person:', form.contact_person)
 }
 
-const onContactNumberInput = (event) => {
+function onContactNumberInput(event) {
   form.contact_number = event.target.value
   console.log('Contact number:', form.contact_number)
 }
 
-const onNotesInput = (event) => {
+function onNotesInput(event) {
   form.notes = event.target.value
   console.log('Notes:', form.notes)
 }
@@ -260,6 +347,14 @@ const onNotesInput = (event) => {
 .btn-save{ background:#ff6b1a; color:#fff; border:0; padding:10px 16px; border-radius:8px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px }
 .btn-save:hover{ background:#ff5a00 }
 .btn-save svg{ width:16px; height:16px }
+
+.map-picker-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center; z-index:50; padding:20px }
+.map-picker-panel{ background:#fff; border-radius:16px; width:100%; max-width:640px; padding:24px; box-shadow:0 18px 40px rgba(15,23,42,0.25); display:flex; flex-direction:column; gap:10px }
+.map-picker-panel header h4{ margin:0; font-size:18px }
+.map-picker-panel header p{ margin:2px 0 0; font-size:13px; color:#6b7280 }
+.shelter-map{ width:100%; height:320px; border-radius:12px; border:1px solid #e5e7eb }
+.map-coords{ font-size:13px; color:#374151; margin:0 }
+.map-picker-footer{ display:flex; justify-content:flex-end; gap:10px }
 
 @media (max-width:480px){
   .form-row.two{ grid-template-columns:1fr }
