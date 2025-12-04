@@ -804,6 +804,59 @@ function viewRecentActivities() {
   .generate-btn, .view-logs { flex: 1; justify-content: center; }
 }
 
+@media (max-width: 768px) {
+  .container { padding: 0.8rem; }
+  .topbar h2 { font-size: 18px; }
+  .stats-grid { gap: 1rem; grid-template-columns: repeat(2, 1fr); }
+  .stat { padding: 1rem; }
+  .stat .num { font-size: 24px; }
+  .stat .label { font-size: 12px; }
+  .panel { padding: 1rem; }
+  .panel-head { font-size: 14px; }
+  .actions-grid { grid-template-columns: 1fr; gap: 0.8rem; }
+  .qa { padding: 0.8rem; }
+  .ai-header { gap: 0.8rem; }
+  .ai-actions { gap: 0.5rem; flex-wrap: wrap; }
+  .generate-btn, .view-logs { padding: 0.4rem 0.8rem; font-size: 12px; }
+  .recommendations-list { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .container { padding: 0.5rem; }
+  .topbar h2 { font-size: 16px; margin-bottom: 1rem; }
+  .stats-grid { gap: 0.8rem; grid-template-columns: 1fr; }
+  .stat { padding: 0.8rem; }
+  .stat .num { font-size: 18px; }
+  .stat .label { font-size: 11px; }
+  .panels { gap: 1rem; }
+  .panel { padding: 0.8rem; }
+  .panel-head { font-size: 13px; margin-bottom: 0.75rem; }
+  .actions-grid { grid-template-columns: 1fr; gap: 0.6rem; }
+  .qa { padding: 0.6rem; gap: 0.75rem; }
+  .qa-text .text { font-size: 12px; }
+  .qa-text .sub { font-size: 10px; }
+  .icon-cta svg { width: 20px; height: 20px; }
+  .ai-section { padding: 1rem; }
+  .ai-header { flex-direction: column; gap: 0.8rem; }
+  .ai-header h3 { font-size: 14px; }
+  .ai-header p { font-size: 12px; }
+  .ai-actions { width: 100%; gap: 0.5rem; flex-wrap: wrap; }
+  .generate-btn, .view-logs { padding: 0.6rem; font-size: 11px; flex: 1; min-height: 40px; }
+  .ai-grid { gap: 0.8rem; }
+  .ai-card { padding: 0.8rem; gap: 0.6rem; }
+  .ai-icon svg { width: 24px; height: 24px; }
+  .ai-lead { font-size: 12px; }
+  .muted { font-size: 11px; }
+  .num-big { font-size: 24px; }
+  .rec-item { padding: 0.8rem; }
+  .rec-header { font-size: 12px; }
+  .rec-priority { font-size: 9px; }
+  .rec-text { font-size: 11px; }
+  .rec-footer { font-size: 10px; }
+  .activities li { font-size: 12px; padding: 0.5rem 0; }
+  .time { font-size: 11px; }
+}
+
 /* AI Recommendations List */
 .ai-recommendations {
   margin-top: 1.5rem;

@@ -2721,26 +2721,428 @@ function viewSheltersOnMap() {
 }
 
 @media (max-width: 480px) {
+  /* Header */
+  .recommendations-header {
+    padding: 1.2rem;
+  }
+
   .recommendations-header h1 {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
   }
 
   .recommendations-header p {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
   }
 
+  .ai-badge-header {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  /* Main Content Layout */
+  .recommendations-content {
+    padding: 1.2rem;
+    gap: 1rem;
+    flex-direction: column;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 8px;
+  }
+
+  .location-section {
+    grid-column: 1/-1;
+  }
+
+  .location-section h3,
+  .risk-section h3 {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Hero Shelter Section */
+  .hero-shelter-banner {
+    padding: 1.2rem;
+    border-radius: 8px;
+  }
+
+  .hero-shelter-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .hero-shelter-main {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+  }
+
+  .hero-shelter-name {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-shelter-description {
+    font-size: 0.8rem;
+  }
+
+  .hero-shelter-tags {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-shelter-tag {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .hero-shelter-score {
+    align-self: center;
+  }
+
+  .hero-score-ring {
+    width: 80px;
+    height: 80px;
+  }
+
+  .hero-score-inner {
+    width: 64px;
+    height: 64px;
+  }
+
+  .hero-score-value {
+    font-size: 1.4rem;
+  }
+
+  .hero-score-label {
+    font-size: 0.65rem;
+  }
+
+  .hero-shelter-actions {
+    width: 100%;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .hero-btn-primary,
+  .hero-btn-secondary {
+    width: 100%;
+    min-height: 44px;
+    font-size: 0.8rem;
+    padding: 0.8rem;
+    justify-content: center;
+  }
+
+  /* Routes Section */
+  .routes-section-header {
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 1rem;
+  }
+
+  .routes-section-title {
+    font-size: 1.1rem;
+  }
+
+  .routes-legend {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .route-legend-item {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .routes-timeline {
+    padding: 1rem;
+  }
+
+  .route-card-enhanced {
+    flex-direction: column;
+    gap: 0.8rem;
+    align-items: center;
+    padding: 1rem;
+  }
+
+  .route-rank-badge {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 0.8rem;
+  }
+
+  .rank-number {
+    font-size: 1rem;
+  }
+
+  .route-card-content {
+    width: 100%;
+    text-align: center;
+  }
+
+  .route-card-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .route-title {
+    font-size: 0.95rem;
+  }
+
+  .route-duration {
+    font-size: 0.75rem;
+  }
+
+  .route-quick-stats {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .route-stat-item {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .route-details-enhanced {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  /* Guidelines Section */
+  .guidelines-header {
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 1rem;
+  }
+
+  .guidelines-title {
+    font-size: 1.1rem;
+  }
+
+  .guidelines-badge {
+    align-self: flex-start;
+    font-size: 0.7rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .guidelines-content {
+    padding: 1rem;
+  }
+
+  .guidelines-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .guideline-card {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .guideline-icon-circle {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    min-width: 44px;
+    margin-bottom: 0.5rem;
+  }
+
+  .guideline-emoji {
+    font-size: 1.3rem;
+  }
+
+  .guideline-title {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .guideline-description {
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  /* Emergency Section */
+  .emergency-header-content {
+    padding: 1rem;
+  }
+
+  .emergency-header-content h2 {
+    font-size: 1.1rem;
+  }
+
+  .emergency-priority-badge {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.6rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .emergency-content {
+    padding: 1rem;
+  }
+
+  .emergency-scenarios {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .scenario-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .scenario-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .scenario-title {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .scenario-description {
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .scenario-action {
+    font-size: 0.75rem;
+    padding: 0.6rem 1rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Hotline Info */
+  .hotline-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.8rem;
+    padding: 1rem;
+  }
+
+  .hotline-number {
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
+
+  .hotline-info {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hotline-info p {
+    font-size: 0.8rem;
+  }
+
+  .hotline-copy-btn {
+    min-height: 44px;
+    font-size: 0.75rem;
+    padding: 0.6rem;
+  }
+
+  /* Grid Adjustments */
   .tips-grid {
     grid-template-columns: 1fr;
+    gap: 0.8rem;
   }
 
+  .shelters-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  /* Section Header */
   .section-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
+    padding: 0.5rem 0;
   }
 
+  .section-header-title {
+    font-size: 1rem;
+  }
+
+  .section-header-badge {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  /* Action Buttons */
   .action-buttons {
+    display: flex;
     flex-direction: column;
+    gap: 0.8rem;
+    padding: 1rem;
+  }
+
+  .btn-generate,
+  .btn-export,
+  .btn-share,
+  .btn-back {
+    width: 100%;
+    min-height: 44px;
+    font-size: 0.8rem;
+    padding: 0.8rem;
+    flex: none;
+  }
+
+  /* AI Messages */
+  .ai-error-message {
+    font-size: 0.75rem;
+    padding: 0.8rem;
+    gap: 0.5rem;
+  }
+
+  .ai-last-updated {
+    font-size: 0.75rem;
+    padding: 0.6rem 0.8rem;
+  }
+
+  /* AI Summary */
+  .ai-summary {
+    padding: 1rem;
+    margin-top: 1rem;
+    border-radius: 8px;
+  }
+
+  .ai-summary h4 {
+    font-size: 0.95rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .ai-summary p {
+    font-size: 0.8rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .immediate-actions {
+    padding: 0.8rem;
+    margin-top: 0.8rem;
+  }
+
+  .immediate-actions li {
+    font-size: 0.75rem;
+    line-height: 1.4;
   }
 }
 
@@ -2962,8 +3364,8 @@ function viewSheltersOnMap() {
 
 .routes-modal-content {
   flex: 1;
-  overflow-y: auto;
   padding: 1.5rem 2rem;
+  overflow: visible;
 }
 
 /* HERO Shelter Section - More Noticeable */

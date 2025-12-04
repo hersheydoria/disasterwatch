@@ -688,6 +688,104 @@ function getSeverityClass(magnitude) {
   }
 }
 
+@media (max-width: 480px) {
+  .main {
+    padding: 12px;
+  }
+
+  .page-head {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .page-head h2 {
+    font-size: 18px;
+  }
+
+  .stats-grid.small {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .stats-item {
+    padding: 12px;
+  }
+
+  .stats-item-value {
+    font-size: 18px;
+  }
+
+  .stats-item-label {
+    font-size: 11px;
+  }
+
+  .filters {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .search {
+    width: 100%;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  .filter-group select {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .alerts-table {
+    font-size: 11px;
+  }
+
+  .alerts-table thead {
+    display: none;
+  }
+
+  .alerts-table tbody,
+  .alerts-table tr,
+  .alerts-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .alerts-table tr {
+    margin-bottom: 12px;
+    border: 1px solid #e6e9ec;
+    border-radius: 8px;
+    padding: 10px;
+  }
+
+  .alerts-table td {
+    padding: 8px 0;
+    border: none;
+    text-align: left;
+  }
+
+  .alerts-table td:before {
+    content: attr(data-label);
+    font-weight: 600;
+    display: inline-block;
+    width: 40%;
+    color: #666;
+  }
+
+  .action-buttons {
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .action-buttons button {
+    flex: 1;
+    min-width: 40px;
+    padding: 6px;
+    font-size: 12px;
+  }
+}
+
 .action-modal-backdrop{ position:fixed; inset:0; background:rgba(15,23,42,0.45); display:flex; align-items:center; justify-content:center; z-index:40; padding:16px }
 .action-modal-card{ width:100%; max-width:420px; background:#fff; border-radius:18px; padding:20px; box-shadow:0 25px 45px rgba(15,23,42,0.25); display:flex; flex-direction:column; gap:12px }
 .action-modal-card header{ display:flex; justify-content:space-between; align-items:flex-start }

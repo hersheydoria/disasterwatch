@@ -242,17 +242,24 @@ defineEmits(['navigate'])
 
 @media (max-width: 480px) {
   .footer {
-    padding: 2rem 1rem 1rem;
+    padding: 1.5rem 0.8rem 0.8rem;
+  }
+
+  .footer-content {
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 
   .footer-logo {
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.6rem;
+    gap: 0.6rem;
   }
 
   .footer-logo-icon {
-    width: 35px;
-    height: 35px;
-    font-size: 1.2rem;
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+    border-radius: 6px;
   }
 
   .footer-logo-text {
@@ -260,11 +267,21 @@ defineEmits(['navigate'])
   }
 
   .footer-section h3 {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    margin-bottom: 0.8rem;
   }
 
   .footer-section p {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .footer-section ul {
+    list-style: none;
+  }
+
+  .footer-section li {
+    margin-bottom: 0.6rem;
   }
 
   .social-links a {

@@ -776,21 +776,27 @@ const onMessageInput = (event) => {
 
 @media (max-width: 480px) {
   .contact-hero {
-    padding: 1.5rem 1rem;
-    min-height: 120px;
+    padding: 1.2rem 1rem;
+    min-height: 110px;
   }
 
   .contact-hero-title {
-    font-size: 1.2rem;
+    font-size: 1.15rem;
     margin-bottom: 0.3rem;
+    line-height: 1.3;
   }
 
   .contact-hero-subtitle {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+    line-height: 1.4;
   }
 
   .contact-main {
-    padding: 1.5rem 1rem;
+    padding: 1.2rem 1rem;
+  }
+
+  .contact-grid {
+    gap: 1rem;
   }
 
   .contact-wrapper {
@@ -799,12 +805,13 @@ const onMessageInput = (event) => {
   }
 
   .contact-form-section {
-    padding: 1.2rem;
+    padding: 1rem;
+    border-radius: 10px;
   }
 
   .form-header h2 {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
   }
 
   .form-input,

@@ -1075,7 +1075,6 @@ watch([filteredZones, filteredShelters, filteredHospitals, filteredPredictions],
   width: 320px;
   background: white;
   border-right: 1px solid #e0e0e0;
-  overflow-y: auto;
   padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
@@ -1571,10 +1570,8 @@ watch([filteredZones, filteredShelters, filteredHospitals, filteredPredictions],
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
+  overflow: visible;
   z-index: 50;
-  max-height: 70vh;
-  overflow-y: auto;
 }
 
 .close-btn {
@@ -1807,44 +1804,131 @@ watch([filteredZones, filteredShelters, filteredHospitals, filteredPredictions],
 }
 
 @media (max-width: 480px) {
+  .livemap-wrapper {
+    flex-direction: column;
+    gap: 0;
+  }
+
   .sidebar-panel {
-    padding: 1rem;
+    width: 100%;
+    border-right: none;
+    border-top: 1px solid #e0e0e0;
+    padding: 0.8rem;
+    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-header {
+    border-bottom: 2px solid #FF7A00;
+    padding-bottom: 0.8rem;
+    margin-bottom: 0;
   }
 
   .page-title {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.75rem;
+  }
+
+  .risk-indicator {
+    display: block;
+  }
+
+  .filters-section {
+    display: block;
+  }
+
+  .filter-btn {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.75rem;
+    gap: 0.3rem;
+  }
+
+  .legend-section {
+    display: block;
+  }
+
+  .quick-stats {
+    border-top: 1px solid #eee;
+    padding-top: 0.8rem;
   }
 
   .stats-list {
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
   }
 
-  .info-panel {
-    width: calc(100% - 2rem);
-    left: 1rem;
-    right: 1rem;
-    max-height: 50vh;
+  .map-container {
+    height: 400px;
+    margin-top: 0;
   }
 
   .map-header {
-    padding: 0.8rem;
+    padding: 0.6rem 0.8rem;
+    flex-direction: column;
+    gap: 0.6rem;
+    align-items: flex-start;
   }
 
   .header-left {
-    gap: 0.5rem;
+    gap: 0.8rem;
     flex-direction: column;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
+    width: 100%;
   }
 
   .header-right {
     flex-direction: column;
     width: 100%;
+    gap: 0.5rem;
   }
 
   .action-btn {
-    padding: 0.6rem;
-    font-size: 0.8rem;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.75rem;
     width: 100%;
+    min-height: 44px;
+  }
+
+  .zoom-controls {
+    right: 1rem;
+    top: 50%;
+    gap: 0.3rem;
+  }
+
+  .zoom-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .info-panel {
+    width: calc(100% - 1.6rem);
+    left: 0.8rem;
+    bottom: 0.8rem;
+    max-height: 45vh;
+    border-radius: 10px;
+  }
+
+  .info-title {
+    font-size: 1.05rem;
+    padding-right: 2rem;
+  }
+
+  .info-badge {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .detail-row {
+    font-size: 0.8rem;
+    padding: 0.6rem;
+    border-radius: 4px;
   }
 }
 

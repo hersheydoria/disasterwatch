@@ -694,30 +694,37 @@ const testimonials = ref([
 
 @media (max-width: 480px) {
   .about-hero {
-    padding: 2rem 1rem;
-    min-height: 150px;
+    padding: 1.5rem 1rem;
+    min-height: 120px;
   }
 
   .about-hero-title {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
     margin-bottom: 0.5rem;
+    line-height: 1.3;
   }
 
   .about-hero-subtitle {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
   }
 
   .why-section {
-    padding: 2rem 1rem;
+    padding: 1.5rem 1rem;
   }
 
   .why-text h2 {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .why-text p {
+    font-size: 0.85rem;
     margin-bottom: 0.8rem;
   }
 
   .why-features {
-    gap: 0.8rem;
+    gap: 0.75rem;
   }
 
   .feature-box {

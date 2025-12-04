@@ -356,9 +356,46 @@ function onNotesInput(event) {
 .map-coords{ font-size:13px; color:#374151; margin:0 }
 .map-picker-footer{ display:flex; justify-content:flex-end; gap:10px }
 
-@media (max-width:480px){
-  .form-row.two{ grid-template-columns:1fr }
-  .form-row.two button.map-btn{ grid-column:auto }
+@media (max-width:768px){
+  .add-shelter-wrap{ padding:16px }
   .modal-content{ padding:20px }
+  .modal-content h3{ font-size:16px }
+  .form-group span{ font-size:12px }
+  .form-group input, .form-group select, .form-group textarea{ font-size:13px; padding:8px }
+  .form-row.two{ grid-template-columns:1fr }
+  .form-row.two button.map-btn{ height:40px; width:40px }
+  .form-actions{ gap:10px }
+  .btn-cancel, .btn-save{ padding:8px 12px; font-size:12px }
+}
+
+@media (max-width:480px){
+  .add-shelter-wrap{ padding:12px; min-height:100vh }
+  .page-head{ flex-direction:column; gap:12px }
+  .page-head h2{ font-size:18px }
+  .page-head .desc{ font-size:12px }
+  .btn-refresh{ padding:8px 12px; font-size:12px; flex:1 }
+  .form-modal{ min-height:auto }
+  .modal-content{ padding:16px; max-width:100%; border-radius:8px }
+  .modal-content h3{ font-size:16px; margin-bottom:6px }
+  .modal-desc{ font-size:12px }
+  .shelter-form{ gap:12px }
+  .form-row{ flex-direction:column }
+  .form-row.two{ grid-template-columns:1fr; gap:12px }
+  .form-row.two button.map-btn{ height:44px; width:100%; grid-column:auto }
+  .form-group{ gap:4px }
+  .form-group span{ font-size:12px }
+  .form-group input, .form-group select, .form-group textarea{ font-size:16px; padding:10px }
+  .form-group textarea{ min-height:80px }
+  .form-actions{ flex-direction:column; gap:10px; margin-top:6px }
+  .btn-cancel, .btn-save{ padding:10px; font-size:13px; width:100% }
+  .btn-save svg{ width:14px; height:14px }
+  .map-picker-overlay{ padding:12px }
+  .map-picker-panel{ padding:16px; border-radius:12px }
+  .map-picker-panel header h4{ font-size:16px }
+  .map-picker-panel header p{ font-size:12px }
+  .shelter-map{ height:240px }
+  .map-coords{ font-size:12px }
+  .map-picker-footer{ gap:8px }
+  .map-picker-footer button{ padding:8px 12px; font-size:12px }
 }
 </style>

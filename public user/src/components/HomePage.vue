@@ -555,28 +555,89 @@ const regions = ref([
 }
 
 @media (max-width: 480px) {
+  .hero {
+    min-height: 350px;
+    padding: 1rem;
+  }
+
   .hero-headline {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+  }
+
+  .hero-headline .highlight {
+    display: block;
   }
 
   .hero-description {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    margin-bottom: 1.2rem;
+    line-height: 1.5;
   }
 
   .cta-buttons {
     flex-direction: column;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
   }
 
   .btn {
     width: 100%;
-  }
-
-  .hero {
-    min-height: 400px;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .stats {
-    gap: 1.5rem;
+    gap: 1.2rem;
+    justify-content: space-around;
+    margin-top: 1rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+  }
+
+  .live-status-box {
+    min-width: auto;
+    padding: 1rem;
+    max-width: 100%;
+  }
+
+  .features {
+    padding: 2rem 1rem;
+  }
+
+  .features-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .feature-card {
+    padding: 1.2rem;
+    border-radius: 10px;
+  }
+
+  .feature-card h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .feature-card p {
+    font-size: 0.85rem;
+    line-height: 1.5;
   }
 }
 </style>

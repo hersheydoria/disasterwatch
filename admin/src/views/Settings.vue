@@ -1398,4 +1398,149 @@ const notificationSettings = reactive({
     width: 100%;
   }
 }
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0.75rem;
+  }
+
+  .topbar h2 {
+    font-size: 18px;
+  }
+
+  .tabs {
+    gap: 0;
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+  }
+
+  .tab {
+    padding: 0.75rem 1rem;
+    font-size: 13px;
+  }
+
+  .settings-section {
+    padding: 1rem;
+  }
+
+  .settings-section h3 {
+    font-size: 16px;
+  }
+
+  .profile-upload {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .avatar-large {
+    width: 80px;
+    height: 80px;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-group input,
+  .form-group select {
+    font-size: 16px;
+    padding: 10px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+
+  .notification-card {
+    padding: 1rem;
+  }
+
+  .notification-card-header {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .notification-title {
+    gap: 0.75rem;
+  }
+
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .save-card {
+    flex-direction: column;
+  }
+
+  .save-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .save-actions button {
+    width: 100%;
+  }
+
+  .system-config-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .config-block {
+    padding: 1rem;
+  }
+
+  .config-block h4 {
+    font-size: 14px;
+  }
+
+  .status-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .security-block {
+    padding: 1rem;
+  }
+
+  .login-activity-table {
+    font-size: 11px;
+  }
+
+  .login-activity-table thead {
+    display: none;
+  }
+
+  .login-activity-table tbody,
+  .login-activity-table tr,
+  .login-activity-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .login-activity-table tr {
+    margin-bottom: 10px;
+    border: 1px solid #f0f0f0;
+    border-radius: 6px;
+    padding: 8px;
+  }
+
+  .login-activity-table td {
+    padding: 6px 0;
+    border: none;
+  }
+
+  .login-activity-table td:before {
+    content: attr(data-label);
+    font-weight: 600;
+    display: inline-block;
+    width: 35%;
+    color: #666;
+  }
+}
 </style>

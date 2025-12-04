@@ -124,7 +124,29 @@ input{ border:0; outline:none; font-size:14px; background:transparent; flex:1 }
 .primary:disabled{ opacity:0.6; cursor:not-allowed }
 .primary:active{ transform:translateY(1px) }
 
+@media (max-width:768px){
+  .page-wrap { padding: 30px; }
+  .card { width: 100%; padding: 20px; }
+  .title { font-size: 18px; }
+}
+
 @media (max-width:480px){
-  .card{ width:100%; padding:24px }
+  .page-wrap { padding: 20px; }
+  .bg-circle { display: none; }
+  .card { width: 100%; padding: 20px; }
+  .brand { flex-direction: column; margin-bottom: 12px; }
+  .logo { width: 36px; height: 36px; }
+  .logo-img { width: 20px; height: 20px; }
+  .brand-text { font-size: 14px; }
+  .title { margin: 4px 0 8px; font-size: 18px; }
+  .subtitle { font-size: 12px; margin-bottom: 16px; }
+  .login-form { gap: 10px; }
+  .field .label { font-size: 11px; margin-bottom: 4px; }
+  .input-row { padding: 8px 10px; }
+  .input-row .icon { width: 16px; height: 16px; }
+  input { font-size: 16px; }
+  .remember { font-size: 12px; }
+  .forgot { font-size: 12px; }
+  .primary { padding: 10px; font-size: 14px; }
 }
 </style>

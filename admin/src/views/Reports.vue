@@ -990,4 +990,99 @@ onMounted(async () => {
     padding: 0.75rem;
   }
 }
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0.75rem;
+  }
+
+  .page-title {
+    font-size: 18px;
+  }
+
+  .page-desc {
+    font-size: 12px;
+  }
+
+  .filter-bar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .filter-bar select,
+  .filter-bar input {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .search-box input {
+    font-size: 14px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 12px;
+  }
+
+  .stat-value {
+    font-size: 18px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+  }
+
+  .table-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .table-header button {
+    width: 100%;
+  }
+
+  .reports-table {
+    font-size: 11px;
+  }
+
+  .reports-table thead {
+    display: none;
+  }
+
+  .reports-table tbody,
+  .reports-table tr,
+  .reports-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .reports-table tr {
+    margin-bottom: 12px;
+    border: 1px solid #e6e9ec;
+    border-radius: 8px;
+    padding: 10px;
+  }
+
+  .reports-table td {
+    padding: 8px 0;
+    border: none;
+    text-align: left;
+  }
+
+  .reports-table td:before {
+    content: attr(data-label);
+    font-weight: 600;
+    display: inline-block;
+    width: 40%;
+    color: #666;
+  }
+}
 </style>

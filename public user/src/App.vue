@@ -10,6 +10,7 @@ import Footer from './components/Footer.vue'
 
 const currentPage = ref('home')
 const activeNav = ref('home')
+const navOpen = ref(false)
 
 // Load saved page from localStorage on mount
 onMounted(() => {
@@ -23,8 +24,13 @@ onMounted(() => {
 const navigateTo = (section) => {
   activeNav.value = section
   currentPage.value = section
+  navOpen.value = false
   // Save current page to localStorage
   localStorage.setItem('currentPage', section)
+}
+
+const toggleNav = () => {
+  navOpen.value = !navOpen.value
 }
 </script>
 
@@ -37,7 +43,12 @@ const navigateTo = (section) => {
           <img :src="logoImage" alt="DisasterWatch Logo" class="logo-image" />
           <h1 class="brand-name">DisasterWatch</h1>
         </div>
-        <ul class="nav-links">
+        <button class="hamburger-btn" @click="toggleNav">
+          <span :class="{ open: navOpen }"></span>
+          <span :class="{ open: navOpen }"></span>
+          <span :class="{ open: navOpen }"></span>
+        </button>
+        <ul :class="['nav-links', { open: navOpen }]">
           <li>
             <a 
               href="#home" 
@@ -145,6 +156,39 @@ const navigateTo = (section) => {
   font-weight: 700;
   color: #FF7A00;
   margin: 0;
+}
+
+/* Hamburger Button */
+.hamburger-btn {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  align-items: center;
+}
+
+.hamburger-btn span {
+  width: 24px;
+  height: 3px;
+  background: #333;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.hamburger-btn span.open:nth-child(1) {
+  transform: rotate(45deg) translate(8px, 8px);
+}
+
+.hamburger-btn span.open:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn span.open:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
 }
 
 .nav-links {
@@ -1590,14 +1634,49 @@ const navigateTo = (section) => {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .hamburger-btn {
+    display: flex;
+  }
+
   .nav-content {
-    flex-direction: column;
-    gap: 1rem;
+    flex-direction: row;
+    gap: 0;
   }
 
   .nav-links {
-    gap: 1rem;
-    font-size: 0.9rem;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    flex-direction: column;
+    gap: 0;
+    border-top: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .nav-links.open {
+    max-height: 300px;
+  }
+
+  .nav-links li {
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .nav-links li:last-child {
+    border-bottom: none;
+  }
+
+  .nav-link {
+    display: block;
+    padding: 1rem 2rem;
+  }
+
+  .nav-link::after {
+    display: none;
   }
 
   .hero-headline {
@@ -1632,8 +1711,40 @@ const navigateTo = (section) => {
   }
 
   .nav-links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0;
+    border-top: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .nav-links.open {
+    max-height: 250px;
+  }
+
+  .nav-links li {
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .nav-links li:last-child {
+    border-bottom: none;
+  }
+
+  .nav-link {
+    display: block;
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .nav-link::after {
+    display: none;
   }
 
   .hero-headline {
